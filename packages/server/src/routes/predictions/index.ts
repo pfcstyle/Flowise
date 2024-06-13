@@ -13,7 +13,7 @@ const upload = multer({ dest: `${path.join(__dirname, '..', '..', '..', 'uploads
  *   post:
  *     summary: Create a prediction
  *     tags:
- *       - Predictions
+ *       - chatflows
  *     parameters:
  *       - in: path
  *         name: id

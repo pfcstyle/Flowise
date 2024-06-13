@@ -6,6 +6,8 @@ const router = express.Router()
  * /apikey:
  *  post:
  *   summary: Create a new API key
+ *   tags:
+ *    - API Keys
  */
 router.post('/', apikeyController.createApiKey)
 

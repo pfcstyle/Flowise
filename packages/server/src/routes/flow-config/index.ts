@@ -8,7 +8,7 @@ const router = express.Router()
  *   get:
  *     summary: Get a single flow config
  *     tags:
- *       - Flow Configs
+ *       - chatflows
  *     parameters:
  *       - in: path
  *         name: id

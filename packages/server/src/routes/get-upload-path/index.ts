@@ -8,7 +8,7 @@ const router = express.Router()
  *   get:
  *     summary: Get the path for uploads
  *     tags:
- *       - Upload Path
+ *       - chatflows
  *     responses:
  *       200:
  *         description: OK

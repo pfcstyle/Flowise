@@ -4,11 +4,11 @@ const router = express.Router()
 
 /**
  * @swagger
- * /:
+ * /get-upload-file:
  *   get:
  *     summary: Stream the uploaded file
  *     tags:
- *       - Upload File
+ *       - chatflows
  *     responses:
  *       200:
  *         description: OK

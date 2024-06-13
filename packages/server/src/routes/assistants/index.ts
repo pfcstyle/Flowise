@@ -7,6 +7,8 @@ const router = express.Router()
  * /assistants:
  *  post:
  *   summary: Create a new assistant
+ *   tags:
+ *    - Assistants
  */
 router.post('/', assistantsController.createAssistant)
 
@@ -14,6 +16,8 @@ router.post('/', assistantsController.createAssistant)
  * /assistants:
  *  get:
  *   summary: Get all assistants
+ *   tags:
+ *    - Assistants
  */
 router.get('/', assistantsController.getAllAssistants)
 
@@ -21,6 +25,8 @@ router.get('/', assistantsController.getAllAssistants)
  * /assistants/{id}:
  *  get:
  *   summary: Get an assistant by id
+ *   tags:
+ *    - Assistants
  */
 router.get(['/', '/:id'], assistantsController.getAssistantById)
 

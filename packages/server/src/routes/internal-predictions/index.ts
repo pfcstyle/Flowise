@@ -8,7 +8,7 @@ const router = express.Router()
  *   post:
  *     summary: Create an internal prediction
  *     tags:
- *       - Internal Predictions
+ *       - Chat Messages
  *     parameters:
  *       - in: path
  *         name: id
