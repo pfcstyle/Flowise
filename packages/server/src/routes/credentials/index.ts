@@ -2,17 +2,54 @@ import express from 'express'
 import credentialsController from '../../controllers/credentials'
 const router = express.Router()
 
-// CREATE
+/**
+ * @swagger
+ * /credentials:
+ *  post:
+ *   summary: Create a new credential
+ *   tags:
+ *    - credentials
+ */
 router.post('/', credentialsController.createCredential)
 
-// READ
+/**
+ * @swagger
+ * /credentials:
+ *  get:
+ *   summary: Get all credentials
+ *   tags:
+ *    - credentials
+ */
 router.get('/', credentialsController.getAllCredentials)
+
+/**
+ * @swagger
+ * /credentials/{id}:
+ *  get:
+ *   summary: Get a credential by ID
+ *   tags:
+ *    - credentials
+ */
 router.get(['/', '/:id'], credentialsController.getCredentialById)
 
-// UPDATE
+/**
+ * @swagger
+ * /credentials/{id}:
+ *  put:
+ *   summary: Update a credential
+ *   tags:
+ *    - credentials
+ */
 router.put(['/', '/:id'], credentialsController.updateCredential)
 
-// DELETE
+/**
+ * @swagger
+ * /credentials/{id}:
+ *  delete:
+ *   summary: Delete a credential
+ *   tags:
+ *    - credentials
+ */
 router.delete(['/', '/:id'], credentialsController.deleteCredentials)
 
 export default router

@@ -20,6 +20,8 @@ import { sanitizeMiddleware, getCorsOptions, getAllowedIframeOrigins } from './u
 import { Telemetry } from './utils/telemetry'
 import flowiseApiV1Router from './routes'
 import errorHandlerMiddleware from './middlewares/errors'
+import swaggerUi from 'swagger-ui-express'
+import swaggerSpec from './swaggerConfig'
 
 declare global {
     namespace Express {
@@ -146,6 +148,7 @@ export class App {
                 } else next()
             })
         }
+        this.app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec))
 
         this.app.use('/api/v1', flowiseApiV1Router)
 

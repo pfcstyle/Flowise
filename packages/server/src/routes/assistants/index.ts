@@ -3,17 +3,43 @@ import assistantsController from '../../controllers/assistants'
 
 const router = express.Router()
 
-// CREATE
+/** @swagger
+ * /assistants:
+ *  post:
+ *   summary: Create a new assistant
+ */
 router.post('/', assistantsController.createAssistant)
 
-// READ
+/** @swagger
+ * /assistants:
+ *  get:
+ *   summary: Get all assistants
+ */
 router.get('/', assistantsController.getAllAssistants)
+
+/** @swagger
+ * /assistants/{id}:
+ *  get:
+ *   summary: Get an assistant by id
+ */
 router.get(['/', '/:id'], assistantsController.getAssistantById)
 
-// UPDATE
+/** @swagger
+ * /assistants/{id}:
+ *  put:
+ *   summary: Update an assistant
+ *   tags:
+ *    - Assistants
+ */
 router.put(['/', '/:id'], assistantsController.updateAssistant)
 
-// DELETE
+/** @swagger
+ * /assistants/{id}:
+ *  delete:
+ *   summary: Delete an assistant
+ *   tags:
+ *    - Assistants
+ */
 router.delete(['/', '/:id'], assistantsController.deleteAssistant)
 
 export default router
