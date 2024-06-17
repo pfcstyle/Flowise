@@ -43,7 +43,7 @@ const embedPopupHtmlCode = (chatflowid) => {
     import Chatbot from "https://cdn.jsdelivr.net/npm/flowise-embed/dist/web.js"
     Chatbot.init({
         chatflowid: "${chatflowid}",
-        apiHost: "${baseURL}",
+        apiHost: "${baseURL}"
     })
 </script>`
 }
@@ -143,8 +143,8 @@ const chatwindowConfig = (isReact = false) => {
                     footer: {
                         textColor: '#303235',
                         text: 'Powered by',
-                        company: 'Flowise',
-                        companyLink: 'https://flowiseai.com',
+                        company: 'Esri',
+                        companyLink: 'https://esri.com'
                     }
                 }`
         : `chatWindow: {
@@ -184,8 +184,8 @@ const chatwindowConfig = (isReact = false) => {
                 footer: {
                     textColor: '#303235',
                     text: 'Powered by',
-                    company: 'Flowise',
-                    companyLink: 'https://flowiseai.com',
+                    company: 'Esri',
+                    companyLink: 'https://esri.com'
                 }
             }`
 }
