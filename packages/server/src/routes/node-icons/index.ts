@@ -4,7 +4,7 @@ const router = express.Router()
 
 /**
  * @swagger
- * /node-icon:
+ * /node-icon/{name}:
  *   get:
  *     summary: Get a single node icon
  *     tags:

@@ -6,7 +6,7 @@
 
 # docker compose build --no-cache --force-rm
 
-# docker-compose build
+docker-compose build
 
 docker-compose down
 

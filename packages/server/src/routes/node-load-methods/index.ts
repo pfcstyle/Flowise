@@ -4,7 +4,7 @@ const router = express.Router()
 
 /**
  * @swagger
- * /node-load-method:
+ * /node-load-method/{name}:
  *   post:
  *     summary: Get a single node async options
  *     tags:
