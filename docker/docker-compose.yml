@@ -3,6 +3,7 @@ version: '3.1'
 services:
     flowise:
         build: ../
+        image: registry.cn-hangzhou.aliyuncs.com/myelin2021/flowise-arcgis:latest
         # image: flowiseai/flowise
         restart: always
         environment:
