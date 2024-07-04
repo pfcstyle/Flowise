@@ -31,7 +31,7 @@ const dashboard = {
         },
         {
             id: 'agentflows',
-            title: 'Agentflows',
+            title: 'Workflows',
             type: 'item',
             url: '/agentflows',
             icon: icons.IconUsersGroup,
@@ -56,7 +56,7 @@ const dashboard = {
         },
         {
             id: 'assistants',
-            title: 'Assistants',
+            title: 'OpenAI Assistants',
             type: 'item',
             url: '/assistants',
             icon: icons.IconRobot,
