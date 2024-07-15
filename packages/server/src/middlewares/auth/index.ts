@@ -20,10 +20,17 @@ const authenticateArcGISToken = async (req: Request, res: Response, next: NextFu
                 f: 'json'
             }
         })
-        logger.debug(userInfoResponse)
+        if (userInfoResponse.data.error) {
+            logger.error('Error validating ArcGIS token:', userInfoResponse.data.error)
+            return res.sendStatus(403)
+        }
+        // access, orgId, role, privileges, userType, userLiscenseTypeId
+        const user = userInfoResponse.data
+        req.user = user
+        req.token = token
         next()
     } catch (error) {
-        console.error('Error validating ArcGIS token:', error)
+        logger.error('Error validating ArcGIS token:', error)
         res.sendStatus(403)
     }
 }

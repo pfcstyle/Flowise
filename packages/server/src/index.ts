@@ -28,6 +28,8 @@ declare global {
     namespace Express {
         interface Request {
             io?: Server
+            user?: any
+            token?: string
         }
     }
 }
@@ -119,59 +121,59 @@ export class App {
             next()
         })
 
-        // if (process.env.FLOWISE_USERNAME && process.env.FLOWISE_PASSWORD) {
-        //     const username = process.env.FLOWISE_USERNAME
-        //     const password = process.env.FLOWISE_PASSWORD
-        //     const basicAuthMiddleware = basicAuth({
-        //         users: { [username]: password }
-        //     })
-        //     const whitelistURLs = [
-        //         '/api/v1/verify/apikey/',
-        //         '/api/v1/chatflows/apikey/',
-        //         '/api/v1/public-chatflows',
-        //         '/api/v1/public-chatbotConfig',
-        //         '/api/v1/prediction/',
-        //         '/api/v1/vector/upsert/',
-        //         '/api/v1/node-icon/',
-        //         '/api/v1/components-credentials-icon/',
-        //         '/api/v1/chatflows-streaming',
-        //         '/api/v1/chatflows-uploads',
-        //         '/api/v1/openai-assistants-file/download',
-        //         '/api/v1/feedback',
-        //         '/api/v1/leads',
-        //         '/api/v1/get-upload-file',
-        //         '/api/v1/ip',
-        //         '/api/v1/ping'
-        //     ]
-        //     this.app.use((req, res, next) => {
-        //         if (/\/api\/v1\//i.test(req.url)) {
-        //             whitelistURLs.some((url) => new RegExp(url, 'i').test(req.url)) ? next() : basicAuthMiddleware(req, res, next)
-        //         } else next()
-        //     })
-        // }
-        const whitelistURLs = [
-            '/api/v1/verify/apikey/',
-            '/api/v1/chatflows/apikey/',
-            '/api/v1/public-chatflows',
-            '/api/v1/public-chatbotConfig',
-            '/api/v1/prediction/',
-            '/api/v1/vector/upsert/',
-            '/api/v1/node-icon/',
-            '/api/v1/components-credentials-icon/',
-            '/api/v1/chatflows-streaming',
-            '/api/v1/chatflows-uploads',
-            '/api/v1/openai-assistants-file/download',
-            '/api/v1/feedback',
-            '/api/v1/leads',
-            '/api/v1/get-upload-file',
-            '/api/v1/ip',
-            '/api/v1/ping'
-        ]
-        this.app.use((req, res, next) => {
-            if (/\/api\/v1\//i.test(req.url)) {
-                whitelistURLs.some((url) => new RegExp(url, 'i').test(req.url)) ? next() : authenticateArcGISToken(req, res, next)
-            } else next()
-        })
+        if (process.env.FLOWISE_USERNAME && process.env.FLOWISE_PASSWORD) {
+            const username = process.env.FLOWISE_USERNAME
+            const password = process.env.FLOWISE_PASSWORD
+            const basicAuthMiddleware = basicAuth({
+                users: { [username]: password }
+            })
+            const whitelistURLs = [
+                '/api/v1/verify/apikey/',
+                '/api/v1/chatflows/apikey/',
+                '/api/v1/public-chatflows',
+                '/api/v1/public-chatbotConfig',
+                '/api/v1/prediction/',
+                '/api/v1/vector/upsert/',
+                '/api/v1/node-icon/',
+                '/api/v1/components-credentials-icon/',
+                '/api/v1/chatflows-streaming',
+                '/api/v1/chatflows-uploads',
+                '/api/v1/openai-assistants-file/download',
+                '/api/v1/feedback',
+                '/api/v1/leads',
+                '/api/v1/get-upload-file',
+                '/api/v1/ip',
+                '/api/v1/ping'
+            ]
+            this.app.use((req, res, next) => {
+                if (/\/api\/v1\//i.test(req.url)) {
+                    whitelistURLs.some((url) => new RegExp(url, 'i').test(req.url)) ? next() : basicAuthMiddleware(req, res, next)
+                } else next()
+            })
+        }
+        // const whitelistURLs = [
+        //     '/api/v1/verify/apikey/',
+        //     '/api/v1/chatflows/apikey/',
+        //     '/api/v1/public-chatflows',
+        //     '/api/v1/public-chatbotConfig',
+        //     '/api/v1/prediction/',
+        //     '/api/v1/vector/upsert/',
+        //     '/api/v1/node-icon/',
+        //     '/api/v1/components-credentials-icon/',
+        //     '/api/v1/chatflows-streaming',
+        //     '/api/v1/chatflows-uploads',
+        //     '/api/v1/openai-assistants-file/download',
+        //     '/api/v1/feedback',
+        //     '/api/v1/leads',
+        //     '/api/v1/get-upload-file',
+        //     '/api/v1/ip',
+        //     '/api/v1/ping'
+        // ]
+        // this.app.use((req, res, next) => {
+        //     if (/\/api\/v1\//i.test(req.url)) {
+        //         whitelistURLs.some((url) => new RegExp(url, 'i').test(req.url)) ? next() : authenticateArcGISToken(req, res, next)
+        //     } else next()
+        // })
         this.app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec))
 
         this.app.use('/api/v1', flowiseApiV1Router)
