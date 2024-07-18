@@ -7,9 +7,10 @@ const ARCGIS_USER_INFO_URL = 'https://www.arcgis.com/sharing/rest/community/self
 
 const authenticateArcGISToken = async (req: Request, res: Response, next: NextFunction) => {
     const authHeader = req.headers['authorization']
+    const tokenType = authHeader && authHeader.split(' ')[0]
     const token = authHeader && authHeader.split(' ')[1]
 
-    if (!token) {
+    if (!token || tokenType != 'Bearer') {
         return res.sendStatus(401)
     }
 

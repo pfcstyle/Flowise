@@ -18,6 +18,8 @@ import { IconMenu2 } from '@tabler/icons-react'
 // store
 import { SET_DARKMODE } from '@/store/actions'
 
+import { signOut } from '@/utils/arcgisAuthentication'
+
 // ==============================|| MAIN NAVBAR / HEADER ||============================== //
 
 const MaterialUISwitch = styled(Switch)(({ theme }) => ({
@@ -83,8 +85,11 @@ const Header = ({ handleLeftDrawerToggle }) => {
     }
 
     const signOutClicked = () => {
-        localStorage.removeItem('username')
-        localStorage.removeItem('password')
+        // localStorage.removeItem('username')
+        // localStorage.removeItem('password')
+        // navigate('/', { replace: true })
+        // navigate(0)
+        signOut()
         navigate('/', { replace: true })
         navigate(0)
     }
@@ -128,7 +133,7 @@ const Header = ({ handleLeftDrawerToggle }) => {
             <Box sx={{ flexGrow: 1 }} />
             <MaterialUISwitch checked={isDark} onChange={changeDarkMode} />
             <Box sx={{ ml: 2 }}></Box>
-            <ProfileSection handleLogout={signOutClicked} username={localStorage.getItem('username') ?? ''} />
+            <ProfileSection handleLogout={signOutClicked} username={localStorage.getItem('fullname') ?? ''} />
         </>
     )
 }
