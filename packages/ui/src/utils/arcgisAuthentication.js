@@ -44,7 +44,7 @@ export const signOut = async () => {
 // Function to check the current sign in status and display username if signed in.
 export const checkSignIn = async () => {
     try {
-        await esriId.checkSignInStatus(info.portalUrl + '/sharing/portal/self')
+        await esriId.checkSignInStatus(info.portalUrl + '/sharing/rest/community/self')
         return true
     } catch {
         return false
