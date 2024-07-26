@@ -11,6 +11,7 @@ const router = express.Router()
  *    - chatflows
  */
 router.post('/', chatflowsController.saveChatflow)
+router.post('/importchatflows', chatflowsController.importChatflows)
 
 /**
  * @swagger
