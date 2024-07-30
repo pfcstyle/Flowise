@@ -20,6 +20,8 @@
         "commands": "./dist/commands"
     },
     "scripts": {
+        "doc": "npx typedoc",
+        "uml": "npx uml-js",
         "build": "tsc",
         "start": "run-script-os",
         "clean": "rimraf dist",
@@ -106,6 +108,7 @@
         "start-server-and-test": "^2.0.3",
         "ts-node": "^10.7.0",
         "tsc-watch": "^6.0.4",
+        "typedoc": "^0.26.5",
         "typescript": "^5.4.5"
     }
 }
