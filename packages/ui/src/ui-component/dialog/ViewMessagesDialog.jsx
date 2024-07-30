@@ -7,7 +7,9 @@ import rehypeMathjax from 'rehype-mathjax'
 import rehypeRaw from 'rehype-raw'
 import remarkGfm from 'remark-gfm'
 import remarkMath from 'remark-math'
-import axios from 'axios'
+
+// API
+import assistantsApi from '@/api/assistants'
 
 // material-ui
 import {
@@ -417,11 +419,11 @@ const ViewMessagesDialog = ({ show, dialogProps, onCancel }) => {
 
     const downloadFile = async (fileAnnotation) => {
         try {
-            const response = await axios.post(
-                `${baseURL}/api/v1/openai-assistants-file/download`,
-                { fileName: fileAnnotation.fileName, chatflowId: dialogProps.chatflow.id, chatId: selectedChatId },
-                { responseType: 'blob' }
-            )
+            const response = await assistantsApi.downloadFileFromAssistant({
+                fileName: fileAnnotation.fileName,
+                chatflowId: dialogProps.chatflow.id,
+                chatId: selectedChatId
+            })
             const blob = new Blob([response.data], { type: response.headers['content-type'] })
             const downloadUrl = window.URL.createObjectURL(blob)
             const link = document.createElement('a')

@@ -1,7 +1,6 @@
 import { useState, useEffect, Fragment } from 'react'
 import { useSelector } from 'react-redux'
 import PropTypes from 'prop-types'
-import axios from 'axios'
 
 // Material
 import Autocomplete, { autocompleteClasses } from '@mui/material/Autocomplete'
@@ -10,9 +9,7 @@ import { styled } from '@mui/material/styles'
 
 // API
 import credentialsApi from '@/api/credentials'
-
-// const
-import { baseURL } from '@/store/constant'
+import nodeLoadApi from '@/api/node-load-method'
 
 const StyledPopper = styled(Popper)({
     boxShadow: '0px 8px 10px -5px rgb(0 0 0 / 20%), 0px 16px 24px 2px rgb(0 0 0 / 14%), 0px 6px 30px 5px rgb(0 0 0 / 12%)',
@@ -28,15 +25,8 @@ const StyledPopper = styled(Popper)({
 
 const fetchList = async ({ name, nodeData }) => {
     const loadMethod = nodeData.inputParams.find((param) => param.name === name)?.loadMethod
-    const username = localStorage.getItem('username')
-    const password = localStorage.getItem('password')
-
-    let lists = await axios
-        .post(
-            `${baseURL}/api/v1/node-load-method/${nodeData.name}`,
-            { ...nodeData, loadMethod },
-            { auth: username && password ? { username, password } : undefined }
-        )
+    let lists = await nodeLoadApi
+        .loadByName(nodeData.name, { ...nodeData, loadMethod })
         .then(async function (response) {
             return response.data
         })

@@ -5,6 +5,10 @@ import { Dialog, DialogContent, DialogTitle, TableContainer, Table, TableHead, T
 import moment from 'moment'
 import axios from 'axios'
 import { baseURL } from '@/store/constant'
+import { findCredential } from '@/utils/arcgisAuthentication'
+
+// API
+import aboutAPI from '@/api/about'
 
 const AboutDialog = ({ show, onCancel }) => {
     const portalElement = document.getElementById('portal')
@@ -13,18 +17,8 @@ const AboutDialog = ({ show, onCancel }) => {
 
     useEffect(() => {
         if (show) {
-            const username = localStorage.getItem('username')
-            const password = localStorage.getItem('password')
-
-            const config = {}
-            if (username && password) {
-                config.auth = {
-                    username,
-                    password
-                }
-            }
             const latestReleaseReq = axios.get('https://api.github.com/repos/FlowiseAI/Flowise/releases/latest')
-            const currentVersionReq = axios.get(`${baseURL}/api/v1/version`, { ...config })
+            const currentVersionReq = aboutAPI.getVersion()
 
             Promise.all([latestReleaseReq, currentVersionReq])
                 .then(([latestReleaseData, currentVersionData]) => {

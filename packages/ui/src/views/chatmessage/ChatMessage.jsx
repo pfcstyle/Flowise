@@ -7,7 +7,6 @@ import rehypeMathjax from 'rehype-mathjax'
 import rehypeRaw from 'rehype-raw'
 import remarkGfm from 'remark-gfm'
 import remarkMath from 'remark-math'
-import axios from 'axios'
 import { v4 as uuidv4 } from 'uuid'
 
 import {
@@ -66,6 +65,7 @@ import chatflowsApi from '@/api/chatflows'
 import predictionApi from '@/api/prediction'
 import chatmessagefeedbackApi from '@/api/chatmessagefeedback'
 import leadsApi from '@/api/lead'
+import assistantsApi from '@/api/assistants'
 
 // Hooks
 import useApi from '@/hooks/useApi'
@@ -644,11 +644,11 @@ export const ChatMessage = ({ open, chatflowid, isAgentCanvas, isDialog, preview
 
     const downloadFile = async (fileAnnotation) => {
         try {
-            const response = await axios.post(
-                `${baseURL}/api/v1/openai-assistants-file/download`,
-                { fileName: fileAnnotation.fileName, chatflowId: chatflowid, chatId: chatId },
-                { responseType: 'blob' }
-            )
+            const response = await assistantsApi.downloadFileFromAssistant({
+                fileName: fileAnnotation.fileName,
+                chatflowId: chatflowid,
+                chatId: chatId
+            })
             const blob = new Blob([response.data], { type: response.headers['content-type'] })
             const downloadUrl = window.URL.createObjectURL(blob)
             const link = document.createElement('a')
