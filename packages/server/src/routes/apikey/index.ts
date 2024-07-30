@@ -10,6 +10,7 @@ const router = express.Router()
  *    - API Keys
  */
 router.post('/', apikeyController.createApiKey)
+router.post('/import', apikeyController.importKeys)
 
 /**
  * @swagger
