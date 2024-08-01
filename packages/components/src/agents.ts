@@ -689,7 +689,7 @@ export const formatAgentSteps = (steps: AgentStep[]): BaseMessage[] =>
         }
     })
 
-const renderTextDescription = (tools: StructuredToolInterface[]): string => {
+export const renderTextDescription = (tools: StructuredToolInterface[]): string => {
     return tools.map((tool) => `${tool.name}: ${tool.description}`).join('\n')
 }
 
@@ -721,7 +721,7 @@ export const createReactAgent = async ({ llm, tools, prompt }: CreateReactAgentP
     return agent
 }
 
-class ReActSingleInputOutputParser extends AgentActionOutputParser {
+export class ReActSingleInputOutputParser extends AgentActionOutputParser {
     lc_namespace = ['langchain', 'agents', 'react']
 
     private toolNames: string[]
