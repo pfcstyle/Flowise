@@ -589,7 +589,7 @@ async function createAgent(
         }
         // @ts-ignore
         llm = llm.bindTools(tools)
-
+        console.log('tools:', tools)
         const promptArrays = [new MessagesPlaceholder('messages')] as BaseMessagePromptTemplateLike[]
         if (systemPrompt) promptArrays.unshift(['system', systemPrompt])
         if (humanPrompt) promptArrays.push(['human', humanPrompt])

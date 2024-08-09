@@ -1,3 +1,4 @@
+import { ChainValues } from '@langchain/core/utils/types'
 import { BaseMessage } from '@langchain/core/messages'
 import { RunnableSequence, RunnablePassthrough } from '@langchain/core/runnables'
 import { flatten } from 'lodash'
@@ -5,12 +6,12 @@ import { AgentStep } from 'langchain/agents'
 import { Tool } from '@langchain/core/tools'
 import { BaseChatModel } from '@langchain/core/language_models/chat_models'
 import { ChatPromptTemplate, MessagesPlaceholder, HumanMessagePromptTemplate, PromptTemplate } from '@langchain/core/prompts'
-import { additionalCallbacks } from '../../../src/handler'
+import { additionalCallbacks, CustomChainHandler } from '../../../src/handler'
 import { IVisionChatModal, FlowiseMemory, ICommonObject, INode, INodeData, INodeParams } from '../../../src/Interface'
 import { getBaseClasses } from '../../../src/utils'
 import { ReActSingleInputOutputParser, renderTextDescription, AgentExecutor } from '../../../src/agents'
 import { addImagesToMessages, llmSupportsVision } from '../../../src/multiModalUtils'
-import { checkInputs, Moderation } from '../../moderation/Moderation'
+import { checkInputs, Moderation, streamResponse } from '../../moderation/Moderation'
 import { formatResponse } from '../../outputparsers/OutputParserHelpers'
 import { prompt as systmePrompt } from './prompt-template'
 import { formatLogToString } from 'langchain/agents/format_scratchpad/log'
@@ -87,6 +88,8 @@ class ReActCustomAgentChat_Agents implements INode {
         let tools = nodeData.inputs?.tools as Tool[]
         const moderations = nodeData.inputs?.inputModeration as Moderation[]
         const prependMessages = options?.prependMessages
+        const isStreamable = options.socketIO && options.socketIOClientId
+        options.logger.info(`socketIO: ${options.socketIO}, socketIOClientId: ${options.socketIOClientId}`)
 
         if (moderations && moderations.length > 0) {
             try {
@@ -94,6 +97,8 @@ class ReActCustomAgentChat_Agents implements INode {
                 input = await checkInputs(moderations, input)
             } catch (e) {
                 await new Promise((resolve) => setTimeout(resolve, 500))
+                if (isStreamable)
+                    streamResponse(options.socketIO && options.socketIOClientId, e.message, options.socketIO, options.socketIOClientId)
                 //streamResponse(options.socketIO && options.socketIOClientId, e.message, options.socketIO, options.socketIOClientId)
                 return formatResponse(e.message)
             }
@@ -165,8 +170,14 @@ class ReActCustomAgentChat_Agents implements INode {
         })
 
         const callbacks = await additionalCallbacks(nodeData, options)
-
-        const result = await executor.invoke({ [inputKey]: input }, { callbacks })
+        let result: ChainValues = {}
+        if (isStreamable) {
+            options.logger.info('Using CustomChainHandler for streamable agent')
+            const handler = new CustomChainHandler(options.socketIO, options.socketIOClientId)
+            result = await executor.invoke({ input }, { callbacks: [handler, ...callbacks] })
+        } else {
+            result = await executor.invoke({ [inputKey]: input }, { callbacks })
+        }
 
         await memory.addChatMessages(
             [
