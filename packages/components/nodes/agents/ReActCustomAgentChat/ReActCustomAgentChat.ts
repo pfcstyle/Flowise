@@ -31,13 +31,12 @@ class ReActCustomAgentChat_Agents implements INode {
 
     constructor(fields?: { sessionId?: string }) {
         this.label = 'ReAct Custom Agent for Chat Models'
-        this.name = 'chainOfThoughtAgentChat'
+        this.name = 'reactCustomAgentChat' //reactCustomAgentChat
         this.version = 4.0
         this.type = 'AgentExecutor'
         this.category = 'Agents'
         this.icon = 'agent.svg'
-        this.description =
-            'Agent that uses the Chain of Thought logic to decide what action to take, optimized to be used with Chat Models. Prompt is a array of messages'
+        this.description = 'Agent that uses the ReAct logic to decide what action to take, optimized to be used with LLMs'
         this.baseClasses = [this.type, ...getBaseClasses(AgentExecutor)]
         this.inputs = [
             {
