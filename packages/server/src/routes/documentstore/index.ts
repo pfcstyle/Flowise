@@ -83,7 +83,7 @@ router.delete('/store/:id', documentStoreController.deleteDocumentStore)
  *       200:
  *         description: OK
  */
-router.get('/loaders', documentStoreController.getDocumentLoaders)
+router.get('/components/loaders', documentStoreController.getDocumentLoaders)
 /**
  * @swagger
  * /document-store/loader/{id}/{loaderId}:
@@ -217,5 +217,23 @@ router.put('/chunks/:storeId/:loaderId/:chunkId', documentStoreController.editDo
  *         description: OK
  */
 router.get('/chunks/:storeId/:fileId/:pageNo', documentStoreController.getDocumentStoreFileChunks)
+
+// add chunks to the selected vector store
+router.post('/vectorstore/insert', documentStoreController.insertIntoVectorStore)
+// save the selected vector store
+router.post('/vectorstore/save', documentStoreController.saveVectorStoreConfig)
+// delete data from the selected vector store
+router.delete('/vectorstore/:storeId', documentStoreController.deleteVectorStoreFromStore)
+// query the vector store
+router.post('/vectorstore/query', documentStoreController.queryVectorStore)
+// Get all embedding providers
+router.get('/components/embeddings', documentStoreController.getEmbeddingProviders)
+// Get all vector store providers
+router.get('/components/vectorstore', documentStoreController.getVectorStoreProviders)
+// Get all Record Manager providers
+router.get('/components/recordmanager', documentStoreController.getRecordManagerProviders)
+
+// update the selected vector store from the playground
+router.post('/vectorstore/update', documentStoreController.updateVectorStoreConfigOnly)
 
 export default router
