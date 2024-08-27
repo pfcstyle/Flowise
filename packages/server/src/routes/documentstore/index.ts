@@ -30,17 +30,17 @@ const router = express.Router()
  *         description: Internal Server Error
  */
 router.post('/store', documentStoreController.createDocumentStore)
-
+// List all stores
 /**
  * @swagger
- * /document-store/stores:
+ * /document-store/store:
  *   post:
  *     summary: Get all document stores
  *     tags:
  *       - Document Store
  */
-router.get('/stores', documentStoreController.getAllDocumentStores)
-
+router.get('/store', documentStoreController.getAllDocumentStores)
+// Get specific store
 /**
  * @swagger
  * /document-store/store/{id}:

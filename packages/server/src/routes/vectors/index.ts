@@ -49,6 +49,6 @@ router.post(
  *       200:
  *         description: OK
  */
-router.post(['/internal-upsert/', '/internal-upsert/:id'], vectorsController.createInternalUpsert)
+router.post(['/internal-upsert/', '/internal-upsert/:id'], upload.array('files'), vectorsController.createInternalUpsert)
 
 export default router

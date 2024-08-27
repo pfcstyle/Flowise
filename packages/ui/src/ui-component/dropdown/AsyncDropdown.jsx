@@ -25,8 +25,18 @@ const StyledPopper = styled(Popper)({
 
 const fetchList = async ({ name, nodeData }) => {
     const loadMethod = nodeData.inputParams.find((param) => param.name === name)?.loadMethod
-    let lists = await nodeLoadApi
-        .loadByName(nodeData.name, { ...nodeData, loadMethod })
+    const username = localStorage.getItem('username')
+    const password = localStorage.getItem('password')
+
+    let lists = await axios
+        .post(
+            `${baseURL}/api/v1/node-load-method/${nodeData.name}`,
+            { ...nodeData, loadMethod },
+            {
+                auth: username && password ? { username, password } : undefined,
+                headers: { 'Content-type': 'application/json', 'x-request-from': 'internal' }
+            }
+        )
         .then(async function (response) {
             return response.data
         })

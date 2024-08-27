@@ -87,7 +87,8 @@ class ReActCustomAgentChat_Agents implements INode {
         let tools = nodeData.inputs?.tools as Tool[]
         const moderations = nodeData.inputs?.inputModeration as Moderation[]
         const prependMessages = options?.prependMessages
-        const isStreamable = options.socketIO && options.socketIOClientId
+        // const isStreamable = options.socketIO && options.socketIOClientId
+        const isStreamable = false
         options.logger.info(`socketIO: ${options.socketIO}, socketIOClientId: ${options.socketIOClientId}`)
 
         if (moderations && moderations.length > 0) {

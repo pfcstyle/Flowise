@@ -17,6 +17,20 @@ const AboutDialog = ({ show, onCancel }) => {
 
     useEffect(() => {
         if (show) {
+            // const username = localStorage.getItem('username')
+            // const password = localStorage.getItem('password')
+
+            // const config = {}
+            // if (username && password) {
+            //     config.auth = {
+            //         username,
+            //         password
+            //     }
+            //     config.headers = {
+            //         'Content-type': 'application/json',
+            //         'x-request-from': 'internal'
+            //     }
+            // }
             const latestReleaseReq = axios.get('https://api.github.com/repos/FlowiseAI/Flowise/releases/latest')
             const currentVersionReq = aboutAPI.getVersion()
 

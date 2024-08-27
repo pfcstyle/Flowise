@@ -20,9 +20,8 @@ import { sanitizeMiddleware, getCorsOptions, getAllowedIframeOrigins } from './u
 import { Telemetry } from './utils/telemetry'
 import flowiseApiV1Router from './routes'
 import errorHandlerMiddleware from './middlewares/errors'
-import swaggerUi from 'swagger-ui-express'
-import swaggerSpec from './swaggerConfig'
 import authenticateArcGISToken from './middlewares/auth'
+import { validateAPIKey } from './utils/validateKey'
 
 declare global {
     namespace Express {
@@ -121,36 +120,6 @@ export class App {
             next()
         })
 
-        // if (process.env.FLOWISE_USERNAME && process.env.FLOWISE_PASSWORD) {
-        //     const username = process.env.FLOWISE_USERNAME
-        //     const password = process.env.FLOWISE_PASSWORD
-        //     const basicAuthMiddleware = basicAuth({
-        //         users: { [username]: password }
-        //     })
-        //     const whitelistURLs = [
-        //         '/api/v1/verify/apikey/',
-        //         '/api/v1/chatflows/apikey/',
-        //         '/api/v1/public-chatflows',
-        //         '/api/v1/public-chatbotConfig',
-        //         '/api/v1/prediction/',
-        //         '/api/v1/vector/upsert/',
-        //         '/api/v1/node-icon/',
-        //         '/api/v1/components-credentials-icon/',
-        //         '/api/v1/chatflows-streaming',
-        //         '/api/v1/chatflows-uploads',
-        //         '/api/v1/openai-assistants-file/download',
-        //         '/api/v1/feedback',
-        //         '/api/v1/leads',
-        //         '/api/v1/get-upload-file',
-        //         '/api/v1/ip',
-        //         '/api/v1/ping'
-        //     ]
-        //     this.app.use((req, res, next) => {
-        //         if (/\/api\/v1\//i.test(req.url)) {
-        //             whitelistURLs.some((url) => new RegExp(url, 'i').test(req.url)) ? next() : basicAuthMiddleware(req, res, next)
-        //         } else next()
-        //     })
-        // }
         const whitelistURLs = [
             '/api/v1/verify/apikey/',
             '/api/v1/chatflows/apikey/',
@@ -169,12 +138,73 @@ export class App {
             '/api/v1/ip',
             '/api/v1/ping'
         ]
-        this.app.use((req, res, next) => {
+
+        // if (process.env.FLOWISE_USERNAME && process.env.FLOWISE_PASSWORD) {
+        //     const username = process.env.FLOWISE_USERNAME
+        //     const password = process.env.FLOWISE_PASSWORD
+        //     const basicAuthMiddleware = basicAuth({
+        //         users: { [username]: password }
+        //     })
+        //     this.app.use(async (req, res, next) => {
+        //         if (/\/api\/v1\//i.test(req.url)) {
+        //             if (whitelistURLs.some((url) => new RegExp(url, 'i').test(req.url))) {
+        //                 next()
+        //             } else if (req.headers['x-request-from'] === 'internal') {
+        //                 basicAuthMiddleware(req, res, next)
+        //             } else {
+        //                 const isKeyValidated = await validateAPIKey(req)
+        //                 if (!isKeyValidated) {
+        //                     return res.status(401).json({ error: 'Unauthorized Access' })
+        //                 }
+        //                 next()
+        //             }
+        //         } else {
+        //             next()
+        //         }
+        //     })
+        // } else {
+        //     this.app.use(async (req, res, next) => {
+        //         if (/\/api\/v1\//i.test(req.url)) {
+        //             if (whitelistURLs.some((url) => new RegExp(url, 'i').test(req.url))) {
+        //                 next()
+        //             } else if (req.headers['x-request-from'] === 'internal') {
+        //                 next()
+        //             } else {
+        //                 const isKeyValidated = await validateAPIKey(req)
+        //                 if (!isKeyValidated) {
+        //                     return res.status(401).json({ error: 'Unauthorized Access' })
+        //                 }
+        //                 next()
+        //             }
+        //         } else {
+        //             next()
+        //         }
+        //     })
+        // }
+
+        this.app.use(async (req, res, next) => {
             if (/\/api\/v1\//i.test(req.url)) {
-                whitelistURLs.some((url) => new RegExp(url, 'i').test(req.url)) ? next() : authenticateArcGISToken(req, res, next)
-            } else next()
+                if (whitelistURLs.some((url) => new RegExp(url, 'i').test(req.url))) {
+                    next()
+                } else if (req.headers['x-request-from'] === 'internal') {
+                    next()
+                } else {
+                    // const isKeyValidated = await validateAPIKey(req)
+                    // if (!isKeyValidated) {
+                    //     return res.status(401).json({ error: 'Unauthorized Access' })
+                    // }
+                    authenticateArcGISToken(req, res, next)
+                }
+            } else {
+                next()
+            }
         })
-        this.app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec))
+        // this.app.use((req, res, next) => {
+        //     if (/\/api\/v1\//i.test(req.url)) {
+        //         whitelistURLs.some((url) => new RegExp(url, 'i').test(req.url)) ? next() : authenticateArcGISToken(req, res, next)
+        //     } else next()
+        // })
+        // this.app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec))
 
         this.app.use('/api/v1', flowiseApiV1Router)
 
