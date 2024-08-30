@@ -65,7 +65,7 @@ TabPanel.propTypes = {
 }
 
 const badges = ['POPULAR', 'NEW']
-const types = ['Chatflow', 'Agentflow', 'Tool']
+const types = ['Chatflow', 'Workflow', 'Tool']
 const framework = ['Langchain', 'LlamaIndex']
 const MenuProps = {
     PaperProps: {
@@ -165,7 +165,11 @@ const Marketplace = () => {
     }
 
     function filterByType(data) {
-        return typeFilter.length > 0 ? typeFilter.includes(data.type) : true
+        let tmpTypeFilter = Object.assign([], typeFilter)
+        if (tmpTypeFilter.includes('Workflow')) {
+            tmpTypeFilter.push('Agentflow')
+        }
+        return tmpTypeFilter.length > 0 ? tmpTypeFilter.includes(data.type) : true
     }
 
     function filterByFramework(data) {
@@ -180,8 +184,12 @@ const Marketplace = () => {
         if (!getAllTemplatesMarketplacesApi.data) return
 
         let filteredData = getAllTemplatesMarketplacesApi.data
+        let tmpTypeFilter = Object.assign([], filter.typeFilter)
+        if (tmpTypeFilter.includes['Workflow']) {
+            tmpTypeFilter.push('Agentflow')
+        }
         if (filter.badgeFilter.length > 0) filteredData = filteredData.filter((data) => filter.badgeFilter.includes(data.badge))
-        if (filter.typeFilter.length > 0) filteredData = filteredData.filter((data) => filter.typeFilter.includes(data.type))
+        if (tmpTypeFilter.length > 0) filteredData = filteredData.filter((data) => tmpTypeFilter.includes(data.type))
         if (filter.frameworkFilter.length > 0)
             filteredData = filteredData.filter((data) => (data.framework || []).some((item) => filter.frameworkFilter.includes(item)))
         if (filter.search) {
@@ -397,7 +405,7 @@ const Marketplace = () => {
                             onSearchChange={onSearchChange}
                             search={true}
                             searchPlaceholder='Search Name/Description/Node'
-                            title='Marketplace'
+                            title='Templates'
                         >
                             <ToggleButtonGroup
                                 sx={{ borderRadius: 2, height: '100%' }}

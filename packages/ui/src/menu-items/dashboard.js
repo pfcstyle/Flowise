@@ -40,7 +40,7 @@ const dashboard = {
         },
         {
             id: 'marketplaces',
-            title: 'Marketplaces',
+            title: 'Templates',
             type: 'item',
             url: '/marketplaces',
             icon: icons.IconBuildingStore,
@@ -56,7 +56,7 @@ const dashboard = {
         },
         // {
         //     id: 'assistants',
-        //     title: 'OpenAI Assistants',
+        //     title: 'Assistants',
         //     type: 'item',
         //     url: '/assistants',
         //     icon: icons.IconRobot,
