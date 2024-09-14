@@ -61,8 +61,10 @@ export const buildAgentGraph = async (
     sessionId: string,
     incomingInput: IncomingInput,
     isInternal: boolean,
+    user: any,
     baseURL?: string,
-    socketIO?: Server
+    socketIO?: Server,
+    token?: string
 ): Promise<any> => {
     try {
         const appServer = getRunningExpressApp()
@@ -127,7 +129,9 @@ export const buildAgentGraph = async (
             cachePool: appServer.cachePool,
             isUpsert: false,
             uploads: incomingInput.uploads,
-            baseURL
+            baseURL,
+            token,
+            user
         })
 
         const options = {

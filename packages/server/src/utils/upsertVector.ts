@@ -34,6 +34,9 @@ export const upsertVector = async (req: Request, isInternal: boolean = false) =>
         const chatflowid = req.params.id
         let incomingInput: IncomingInput = req.body
 
+        const user = req.user
+        const token = req.token
+
         const chatflow = await appServer.AppDataSource.getRepository(ChatFlow).findOneBy({
             id: chatflowid
         })
@@ -140,7 +143,9 @@ export const upsertVector = async (req: Request, isInternal: boolean = false) =>
             overrideConfig: incomingInput?.overrideConfig,
             cachePool: appServer.cachePool,
             isUpsert,
-            stopNodeId
+            stopNodeId,
+            token,
+            user
         })
 
         const startingNodes = nodes.filter((nd) => startingNodeIds.includes(nd.data.id))

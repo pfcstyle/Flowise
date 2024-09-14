@@ -61,6 +61,9 @@ import { IAction } from 'flowise-components'
  */
 export const utilBuildChatflow = async (req: Request, socketIO?: Server, isInternal: boolean = false): Promise<any> => {
     try {
+        const token = req.token
+        const user = req.user
+
         const appServer = getRunningExpressApp()
         const chatflowid = req.params.id
 
@@ -195,6 +198,8 @@ export const utilBuildChatflow = async (req: Request, socketIO?: Server, isInter
                 incomingInput,
                 nodes,
                 edges,
+                user,
+                token,
                 socketIO,
                 baseURL
             )
@@ -322,7 +327,9 @@ export const utilBuildChatflow = async (req: Request, socketIO?: Server, isInter
                 uploads: incomingInput.uploads,
                 baseURL,
                 socketIO,
-                socketIOClientId: incomingInput.socketIOClientId
+                socketIOClientId: incomingInput.socketIOClientId,
+                token,
+                user
             })
 
             const nodeToExecute =
@@ -459,12 +466,14 @@ const utilBuildAgentResponse = async (
     incomingInput: IncomingInput,
     nodes: IReactFlowNode[],
     edges: IReactFlowEdge[],
+    user: any,
+    token?: string,
     socketIO?: Server,
     baseURL?: string
 ) => {
     try {
         const appServer = getRunningExpressApp()
-        const streamResults = await buildAgentGraph(agentflow, chatId, sessionId, incomingInput, isInternal, baseURL, socketIO)
+        const streamResults = await buildAgentGraph(agentflow, chatId, sessionId, incomingInput, isInternal, user, baseURL, socketIO, token)
         if (streamResults) {
             const { finalResult, finalAction, sourceDocuments, usedTools, agentReasoning } = streamResults
             const userMessage: Omit<IChatMessage, 'id'> = {

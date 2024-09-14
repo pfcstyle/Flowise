@@ -79,6 +79,8 @@ class OpenAPIToolkit_Tools implements INode {
             'Content-Type': 'application/json'
         }
         if (openAPIToken) headers.Authorization = `Bearer ${openAPIToken}`
+        else headers.Authorization = `Bearer ${options.token}`
+        options.logger.debug(`OpenAPI Toolkit headers: ${headers}`)
         const toolkit = new OpenApiToolkit(new JsonSpec(data), model, headers)
 
         return toolkit.tools

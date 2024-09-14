@@ -438,6 +438,8 @@ type BuildFlowParams = {
     baseURL?: string
     socketIO?: Server
     socketIOClientId?: string
+    token?: string
+    user: any
 }
 
 /**
@@ -464,7 +466,9 @@ export const buildFlow = async ({
     uploads,
     baseURL,
     socketIO,
-    socketIOClientId
+    socketIOClientId,
+    token,
+    user
 }: BuildFlowParams) => {
     const flowNodes = cloneDeep(reactFlowNodes)
 
@@ -555,7 +559,9 @@ export const buildFlow = async ({
                     baseURL,
                     socketIO,
                     socketIOClientId,
-                    componentNodes: componentNodes as ICommonObject
+                    componentNodes: componentNodes as ICommonObject,
+                    token,
+                    user
                 })
 
                 // Save dynamic variables

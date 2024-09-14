@@ -49,6 +49,12 @@ const HowToUseFunctionDialog = ({ show, onCancel }) => {
                             <li>
                                 <code>$flow.state</code>
                             </li>
+                            <li>
+                                <code>$flow.token</code>
+                            </li>
+                            <li>
+                                <code>$flow.user</code>
+                            </li>
                         </ul>
                     </li>
                     <li style={{ marginTop: 10 }}>
