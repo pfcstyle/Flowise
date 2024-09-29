@@ -125,7 +125,6 @@ export class App {
             '/api/v1/chatflows/apikey/',
             '/api/v1/public-chatflows',
             '/api/v1/public-chatbotConfig',
-            '/api/v1/prediction/',
             '/api/v1/vector/upsert/',
             '/api/v1/node-icon/',
             '/api/v1/components-credentials-icon/',
@@ -187,7 +186,8 @@ export class App {
                 if (whitelistURLs.some((url) => new RegExp(url, 'i').test(req.url))) {
                     next()
                 } else if (req.headers['x-request-from'] === 'internal') {
-                    next()
+                    authenticateArcGISToken(req, res, next)
+                    // next()
                 } else {
                     // const isKeyValidated = await validateAPIKey(req)
                     // if (!isKeyValidated) {

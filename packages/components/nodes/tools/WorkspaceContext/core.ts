@@ -9,16 +9,16 @@ export interface WorkspaceContextParameters {
 }
 
 export class WorkspaceTool extends Tool {
-    name = 'workspace_tool'
+    name = 'workspace_context_tool'
     workspaceId = ''
     token = ''
     groupId = ''
-    description = 'Fetch workspace context includes name, description, Apps, contents, etc.'
+    description =
+        'Fetch workspace context includes name, description, Apps, contents, etc. If contents include Feature Services, it will also include the layerFilter. The layerFilter is very important, so you must record it in the output.'
 
     constructor(args?: WorkspaceContextParameters) {
         super()
         this.workspaceId = args?.workspaceId ?? this.workspaceId
-        this.description = args?.description ?? this.description
         this.groupId = args?.groupId ?? this.groupId
         this.token = args?.token ?? this.token
     }
@@ -35,6 +35,18 @@ export class WorkspaceTool extends Tool {
         }
     }
 
+    async fetch_item_data(itemId: string) {
+        const url = `https://www.arcgis.com/sharing/rest/content/items/${itemId}/data?f=json&token=${this.token}`
+        try {
+            const response = await fetch(url)
+            const data = await response.json()
+            return data
+        } catch (error) {
+            console.error('Error fetching item data:', error.message)
+            return null
+        }
+    }
+
     async search_group_items(groupId: string) {
         const url = `https://www.arcgis.com/sharing/rest/content/groups/${groupId}?f=json&token=${this.token}&num=1000`
         try {
@@ -47,28 +59,54 @@ export class WorkspaceTool extends Tool {
         }
     }
 
-    get_group_items_from_response(data: any) {
+    async fetch_groups(itemId: string) {
+        const url = `https://www.arcgis.com/sharing/rest/content/items/${itemId}/groups?f=json&token=${this.token}`
+        try {
+            const response = await fetch(url)
+            const data = await response.json()
+            return data
+        } catch (error) {
+            console.error('Error fetching group items:', error.message)
+            return null
+        }
+    }
+
+    async get_group_items_from_response(data: any) {
         if (!data || data.error) {
             return []
         }
         const contents = Array()
-        const results = data['results']
+        const results = data['items']
         if (results) {
             for (let result of results) {
                 const typeKeywords = result['typeKeywords']
-                if (typeKeywords.contains['arcgis-workspaces-item']) {
+                if (typeKeywords.includes('arcgis-workspaces-item')) {
                     continue
+                }
+                const type = result['type']
+                let layerFilter = ''
+                if (type.includes('Feature Service')) {
+                    const itemdata = await this.fetch_item_data(result['id'])
+                    const errMsg = this.arcgis_response_err(itemdata)
+                    if (errMsg) {
+                        continue
+                    }
+                    const layers = itemdata['layers']
+                    const layer = layers[0]
+                    const layerDefinition = layer['layerDefinition']
+                    layerFilter = layerDefinition['definitionExpression']
                 }
                 contents.push({
                     id: result['id'],
                     title: result['title'] ?? result['name'],
                     thumbnail: result['thumbnail'],
-                    description: result['description'],
+                    description: result['description'] ?? result['snippet'],
                     type: result['type'],
                     url: result['url'],
                     extent: result['extent'],
                     spatialReference: result['spatialReference'],
-                    subInfo: result['subInfo']
+                    subInfo: result['subInfo'],
+                    layerFilter: layerFilter
                 })
             }
         }
@@ -89,7 +127,7 @@ export class WorkspaceTool extends Tool {
     /** @ignore */
     async _call(input: string) {
         const workspaceId = !this.workspaceId ? input : this.workspaceId
-        if (process.env.DEBUG === 'true') console.info(`Fetching workspace context for ${this.workspaceId}`)
+        console.info(`Fetching workspace context for ${this.workspaceId}`)
         const data = await this.fetch_item(workspaceId)
         const errMsg = this.arcgis_response_err(data)
         if (errMsg) {
@@ -102,18 +140,28 @@ export class WorkspaceTool extends Tool {
             if (groupErrMsg) {
                 return groupErrMsg
             }
-            items.push(this.get_group_items_from_response(groupData))
+            items.push(...(await this.get_group_items_from_response(groupData)))
         } else {
-            const properties = data['properties']
-            let groups = []
-            if (properties) {
-                const workspaceRootNode = properties['workspaceRootNode']
-                if (workspaceRootNode) {
-                    groups = workspaceRootNode['groups']
-                }
+            const groups = await this.fetch_groups(workspaceId)
+            const errMsg = this.arcgis_response_err(groups)
+            if (errMsg) {
+                return errMsg
             }
-
-            for (let group of groups) {
+            const adminGroups = groups['admin']
+            const memberGroups = groups['member']
+            for (let group of adminGroups) {
+                if (group['isFav']) {
+                    continue
+                }
+                const groupId = group['id']
+                const groupData = await this.search_group_items(groupId)
+                const groupErrMsg = this.arcgis_response_err(groupData)
+                if (groupErrMsg) {
+                    continue
+                }
+                items.push(...(await this.get_group_items_from_response(groupData)))
+            }
+            for (let group of memberGroups) {
                 const groupId = group['id']
                 const groupData = await this.search_group_items(groupId)
                 const groupErrMsg = this.arcgis_response_err(groupData)
@@ -125,7 +173,7 @@ export class WorkspaceTool extends Tool {
         }
         return JSON.stringify({
             name: data['title'] ?? data['name'],
-            description: data['description'] ?? this.description,
+            description: data['description'] ?? data['snippet'],
             items: items
         })
     }
