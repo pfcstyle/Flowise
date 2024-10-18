@@ -1,6 +1,6 @@
 {
     "name": "flowise",
-    "version": "2.0.5",
+    "version": "2.1.2",
     "description": "Flowiseai Server",
     "main": "dist/index",
     "types": "dist/index.d.ts",
@@ -20,8 +20,6 @@
         "commands": "./dist/commands"
     },
     "scripts": {
-        "doc": "npx typedoc",
-        "uml": "npx uml-js",
         "build": "tsc",
         "start": "run-script-os",
         "clean": "rimraf dist",
@@ -85,8 +83,6 @@
         "sanitize-html": "^2.11.0",
         "socket.io": "^4.6.1",
         "sqlite3": "^5.1.6",
-        "swagger-jsdoc": "^6.2.8",
-        "swagger-ui-express": "^5.0.1",
         "typeorm": "^0.3.6",
         "uuid": "^9.0.1",
         "winston": "^3.9.0"
@@ -97,8 +93,6 @@
         "@types/crypto-js": "^4.1.1",
         "@types/multer": "^1.4.7",
         "@types/sanitize-html": "^2.9.5",
-        "@types/swagger-jsdoc": "^6.0.4",
-        "@types/swagger-ui-express": "^4.1.6",
         "concurrently": "^7.1.0",
         "cypress": "^13.13.0",
         "nodemon": "^2.0.22",
@@ -109,7 +103,6 @@
         "start-server-and-test": "^2.0.3",
         "ts-node": "^10.7.0",
         "tsc-watch": "^6.0.4",
-        "typedoc": "^0.26.5",
         "typescript": "^5.4.5"
     }
 }

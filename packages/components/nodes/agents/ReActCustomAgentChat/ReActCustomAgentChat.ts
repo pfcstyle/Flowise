@@ -7,7 +7,15 @@ import { Tool } from '@langchain/core/tools'
 import { BaseChatModel } from '@langchain/core/language_models/chat_models'
 import { ChatPromptTemplate, MessagesPlaceholder, HumanMessagePromptTemplate, PromptTemplate } from '@langchain/core/prompts'
 import { additionalCallbacks, CustomChainHandler } from '../../../src/handler'
-import { IVisionChatModal, FlowiseMemory, ICommonObject, INode, INodeData, INodeParams } from '../../../src/Interface'
+import {
+    IVisionChatModal,
+    FlowiseMemory,
+    ICommonObject,
+    INode,
+    INodeData,
+    INodeParams,
+    IServerSideEventStreamer
+} from '../../../src/Interface'
 import { getBaseClasses } from '../../../src/utils'
 import { ReActSingleInputOutputParser, renderTextDescription, AgentExecutor } from '../../../src/agents'
 import { addImagesToMessages, llmSupportsVision } from '../../../src/multiModalUtils'
@@ -87,8 +95,10 @@ class ReActCustomAgentChat_Agents implements INode {
         let tools = nodeData.inputs?.tools as Tool[]
         const moderations = nodeData.inputs?.inputModeration as Moderation[]
         const prependMessages = options?.prependMessages
-        // const isStreamable = options.socketIO && options.socketIOClientId
-        const isStreamable = false
+        // const shouldStreamResponse = options.shouldStreamResponse
+        const shouldStreamResponse = false
+        const sseStreamer: IServerSideEventStreamer = options.sseStreamer as IServerSideEventStreamer
+        const chatId = options.chatId
         options.logger.info(`socketIO: ${options.socketIO}, socketIOClientId: ${options.socketIOClientId}`)
 
         if (moderations && moderations.length > 0) {
@@ -97,9 +107,9 @@ class ReActCustomAgentChat_Agents implements INode {
                 input = await checkInputs(moderations, input)
             } catch (e) {
                 await new Promise((resolve) => setTimeout(resolve, 500))
-                if (isStreamable)
-                    streamResponse(options.socketIO && options.socketIOClientId, e.message, options.socketIO, options.socketIOClientId)
-                //streamResponse(options.socketIO && options.socketIOClientId, e.message, options.socketIO, options.socketIOClientId)
+                if (shouldStreamResponse) {
+                    streamResponse(sseStreamer, chatId, e.message)
+                }
                 return formatResponse(e.message)
             }
         }
@@ -171,9 +181,8 @@ class ReActCustomAgentChat_Agents implements INode {
 
         const callbacks = await additionalCallbacks(nodeData, options)
         let result: ChainValues = {}
-        if (isStreamable) {
-            options.logger.info('Using CustomChainHandler for streamable agent')
-            const handler = new CustomChainHandler(options.socketIO, options.socketIOClientId)
+        if (shouldStreamResponse) {
+            const handler = new CustomChainHandler(sseStreamer, chatId)
             result = await executor.invoke({ input }, { callbacks: [handler, ...callbacks] })
         } else {
             result = await executor.invoke({ [inputKey]: input }, { callbacks })
