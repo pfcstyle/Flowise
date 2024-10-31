@@ -143,7 +143,7 @@ class File_DocumentLoaders implements INode {
 
                 let extension = ''
                 // eslint-disable-next-line no-useless-escape
-                const match = file.match(/^data:([A-Za-z-+\/]+);base64,/)
+                const match = file.match(/^data:([^;]+);base64,/)
 
                 if (!match) {
                     fileBlobs.push({
