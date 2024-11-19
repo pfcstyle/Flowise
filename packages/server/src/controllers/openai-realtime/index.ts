@@ -56,7 +56,8 @@ const executeAgentTool = async (req: Request, res: Response, next: NextFunction)
             req.body.toolName,
             req.body.inputArgs,
             req.user,
-            req.token
+            req.token,
+            req.body.apiMessageId
         )
         return res.json(apiResponse)
     } catch (error) {
