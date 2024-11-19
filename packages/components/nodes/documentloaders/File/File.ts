@@ -164,6 +164,7 @@ class File_DocumentLoaders implements INode {
             json: (blob) => new JSONLoader(blob),
             jsonl: (blob) => new JSONLinesLoader(blob, '/' + pointerName.trim()),
             txt: (blob) => new TextLoader(blob),
+            md: (blob) => new TextLoader(blob),
             csv: (blob) => new CSVLoader(blob),
             xls: (blob) => new CSVLoader(blob),
             xlsx: (blob) => new CSVLoader(blob),

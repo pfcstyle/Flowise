@@ -73,6 +73,9 @@ export const utilBuildChatflow = async (req: Request, isInternal: boolean = fals
         const baseURL = `${httpProtocol}://${req.get('host')}`
 
         let incomingInput: IncomingInput = req.body
+        incomingInput.overrideConfig = incomingInput.overrideConfig || {}
+        incomingInput.overrideConfig['vars'] = incomingInput.overrideConfig['vars'] || {}
+        incomingInput.overrideConfig['vars']['token'] = token
         let nodeToExecuteData: INodeData
         const chatflow = await appServer.AppDataSource.getRepository(ChatFlow).findOneBy({
             id: chatflowid
