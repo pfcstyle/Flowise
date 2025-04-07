@@ -54,14 +54,14 @@ const dashboard = {
             icon: icons.IconTool,
             breadcrumbs: true
         },
-        // {
-        //     id: 'assistants',
-        //     title: 'Assistants',
-        //     type: 'item',
-        //     url: '/assistants',
-        //     icon: icons.IconRobot,
-        //     breadcrumbs: true
-        // },
+        {
+            id: 'assistants',
+            title: 'OpenAI Assistants',
+            type: 'item',
+            url: '/assistants',
+            icon: icons.IconRobot,
+            breadcrumbs: true
+        },
         {
             id: 'credentials',
             title: 'Credentials',

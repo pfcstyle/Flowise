@@ -92,9 +92,14 @@ export class WorkspaceTool extends Tool {
                         continue
                     }
                     const layers = itemdata['layers']
+                    if (!layers || layers.length === 0) {
+                        continue
+                    }
                     const layer = layers[0]
                     const layerDefinition = layer['layerDefinition']
-                    layerFilter = layerDefinition['definitionExpression']
+                    if (layerDefinition && layerDefinition['definitionExpression']) {
+                        layerFilter = layerDefinition['definitionExpression']
+                    }
                 }
                 contents.push({
                     id: result['id'],
