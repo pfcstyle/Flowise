@@ -19,6 +19,7 @@ import { sanitizeMiddleware, getCorsOptions, getAllowedIframeOrigins } from './u
 import { Telemetry } from './utils/telemetry'
 import flowiseApiV1Router from './routes'
 import errorHandlerMiddleware from './middlewares/errors'
+import authenticateArcGISToken from './middlewares/auth'
 import { SSEStreamer } from './utils/SSEStreamer'
 import { validateAPIKey } from './utils/validateKey'
 import { IMetricsProvider } from './Interface.Metrics'
@@ -31,6 +32,10 @@ import 'global-agent/bootstrap'
 
 declare global {
     namespace Express {
+        interface Request {
+            user?: any
+            token?: string
+        }
         namespace Multer {
             interface File {
                 bucket: string
@@ -199,13 +204,14 @@ export class App {
                         if (isWhitelisted) {
                             next()
                         } else if (req.headers['x-request-from'] === 'internal') {
-                            next()
+                            authenticateArcGISToken(req, res, next)
                         } else {
-                            const isKeyValidated = await validateAPIKey(req)
-                            if (!isKeyValidated) {
-                                return res.status(401).json({ error: 'Unauthorized Access' })
-                            }
-                            next()
+                            // const isKeyValidated = await validateAPIKey(req)
+                            // if (!isKeyValidated) {
+                            //     return res.status(401).json({ error: 'Unauthorized Access' })
+                            // }
+                            // next()
+                            authenticateArcGISToken(req, res, next)
                         }
                     } else {
                         return res.status(401).json({ error: 'Unauthorized Access' })

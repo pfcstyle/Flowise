@@ -798,6 +798,12 @@ const checkIfStreamValid = async (
  * @param {boolean} isInternal
  */
 export const utilBuildChatflow = async (req: Request, isInternal: boolean = false): Promise<any> => {
+    req.body = req.body || {} // Ensure req.body is never undefined
+    req.body.overrideConfig = {
+        ...req.body.overrideConfig,
+        arcgisUser: req.user,
+        arcgisToken: req.token
+    } // Ensure overrideConfig is never undefined
     const appServer = getRunningExpressApp()
     const chatflowid = req.params.id
 

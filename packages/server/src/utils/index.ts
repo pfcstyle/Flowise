@@ -572,7 +572,9 @@ export const buildFlow = async ({
                 availableVariables,
                 variableOverrides
             )
-
+            reactFlowNodeData.inputs = reactFlowNodeData.inputs ?? {}
+            reactFlowNodeData.inputs['arcgisUser'] = flowData.arcgisUser
+            reactFlowNodeData.inputs['arcgisToken'] = flowData.arcgisToken
             if (isUpsert && stopNodeId && nodeId === stopNodeId) {
                 logger.debug(`[server]: Upserting ${reactFlowNode.data.label} (${reactFlowNode.data.id})`)
                 const indexResult = await newNodeInstance.vectorStoreMethods!['upsert']!.call(newNodeInstance, reactFlowNodeData, {

@@ -2,7 +2,9 @@ version: '3.1'
 
 services:
     flowise:
-        image: flowiseai/flowise
+        build: ../
+        image: registry.cn-hangzhou.aliyuncs.com/myelin2021/flowise-arcgis:latest
+        # image: flowiseai/flowise
         restart: always
         environment:
             - PORT=${PORT}
@@ -11,6 +13,7 @@ services:
             - FLOWISE_USERNAME=${FLOWISE_USERNAME}
             - FLOWISE_PASSWORD=${FLOWISE_PASSWORD}
             - FLOWISE_FILE_SIZE_LIMIT=${FLOWISE_FILE_SIZE_LIMIT}
+            - OVERRIDE_DATABASE=${OVERRIDE_DATABASE}
             - DEBUG=${DEBUG}
             - DATABASE_PATH=${DATABASE_PATH}
             - DATABASE_TYPE=${DATABASE_TYPE}
@@ -58,5 +61,17 @@ services:
             retries: 5
             start_period: 30s
         volumes:
-            - ~/.flowise:/root/.flowise
-        entrypoint: /bin/sh -c "sleep 3; flowise start"
+            - ./.flowise:/root/.flowise
+        entrypoint: /bin/sh -c "sleep 3; pnpm start"
+        depends_on:
+            - postgres
+
+    postgres:
+        image: pgvector/pgvector:pg17
+        restart: always
+        environment:
+            - POSTGRES_PASSWORD=admin123
+        ports:
+            - 5432:5432
+        volumes:
+            - ./postgres:/var/lib/postgresql/data

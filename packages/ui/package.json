@@ -59,7 +59,8 @@
         "remark-gfm": "^3.0.1",
         "remark-math": "^5.1.1",
         "uuid": "^9.0.1",
-        "yup": "^0.32.9"
+        "yup": "^0.32.9",
+        "@arcgis/map-components-react": "^4.30.5"
     },
     "scripts": {
         "dev": "vite",

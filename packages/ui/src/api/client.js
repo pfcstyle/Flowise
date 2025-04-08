@@ -1,5 +1,6 @@
 import axios from 'axios'
 import { baseURL } from '@/store/constant'
+import { signIn, findCredential } from '@/utils/arcgisAuthentication'
 
 const apiClient = axios.create({
     baseURL: `${baseURL}/api/v1`,
@@ -9,17 +10,16 @@ const apiClient = axios.create({
     }
 })
 
-apiClient.interceptors.request.use(function (config) {
-    const username = localStorage.getItem('username')
-    const password = localStorage.getItem('password')
-
-    if (username && password) {
-        config.auth = {
-            username,
-            password
+apiClient.interceptors.request.use(async function (config) {
+    let credential = findCredential()
+    if (credential) {
+        config.headers.Authorization = `Bearer ${credential.token}`
+    } else {
+        credential = await signIn()
+        if (credential) {
+            config.headers.Authorization = `Bearer ${credential.token}`
         }
     }
-
     return config
 })
 

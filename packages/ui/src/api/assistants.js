@@ -44,6 +44,8 @@ const uploadFilesToAssistant = (credentialId, formData) =>
         headers: { 'Content-Type': 'multipart/form-data' }
     })
 
+const downloadFileFromAssistant = (body) => client.post(`/openai-assistants-file/download`, body, { responseType: 'blob' })
+
 const getChatModels = () => client.get('/assistants/components/chatmodels')
 const getDocStores = () => client.get('/assistants/components/docstores')
 const getTools = () => client.get('/assistants/components/tools')
@@ -62,6 +64,7 @@ export default {
     listAssistantVectorStore,
     updateAssistantVectorStore,
     createAssistantVectorStore,
+    downloadFileFromAssistant,
     uploadFilesToAssistant,
     uploadFilesToAssistantVectorStore,
     deleteFilesFromAssistantVectorStore,

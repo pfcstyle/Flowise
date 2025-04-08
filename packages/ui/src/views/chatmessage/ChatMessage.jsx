@@ -9,6 +9,7 @@ import remarkMath from 'remark-math'
 import axios from 'axios'
 import { v4 as uuidv4 } from 'uuid'
 import { EventStreamContentType, fetchEventSource } from '@microsoft/fetch-event-source'
+import { signIn, findCredential } from '@/utils/arcgisAuthentication'
 
 import {
     Box,
@@ -70,6 +71,7 @@ import vectorstoreApi from '@/api/vectorstore'
 import attachmentsApi from '@/api/attachments'
 import chatmessagefeedbackApi from '@/api/chatmessagefeedback'
 import leadsApi from '@/api/lead'
+import assistantsApi from '@/api/assistants'
 
 // Hooks
 import useApi from '@/hooks/useApi'
@@ -856,8 +858,7 @@ export const ChatMessage = ({ open, chatflowid, isAgentCanvas, isDialog, preview
     const fetchResponseFromEventStream = async (chatflowid, params) => {
         const chatId = params.chatId
         const input = params.question
-        const username = localStorage.getItem('username')
-        const password = localStorage.getItem('password')
+        let credential = findCredential()
         params.streaming = true
         await fetchEventSource(`${baseURL}/api/v1/internal-prediction/${chatflowid}`, {
             openWhenHidden: true,
@@ -865,7 +866,7 @@ export const ChatMessage = ({ open, chatflowid, isAgentCanvas, isDialog, preview
             body: JSON.stringify(params),
             headers: {
                 'Content-Type': 'application/json',
-                Authorization: username && password ? `Basic ${btoa(`${username}:${password}`)}` : undefined,
+                Authorization: credential ? `Bearer ${credential.token}` : undefined,
                 'x-request-from': 'internal'
             },
             async onopen(response) {
@@ -987,11 +988,11 @@ export const ChatMessage = ({ open, chatflowid, isAgentCanvas, isDialog, preview
 
     const downloadFile = async (fileAnnotation) => {
         try {
-            const response = await axios.post(
-                `${baseURL}/api/v1/openai-assistants-file/download`,
-                { fileName: fileAnnotation.fileName, chatflowId: chatflowid, chatId: chatId },
-                { responseType: 'blob' }
-            )
+            const response = await assistantsApi.downloadFileFromAssistant({
+                fileName: fileAnnotation.fileName,
+                chatflowId: chatflowid,
+                chatId: chatId
+            })
             const blob = new Blob([response.data], { type: response.headers['content-type'] })
             const downloadUrl = window.URL.createObjectURL(blob)
             const link = document.createElement('a')
