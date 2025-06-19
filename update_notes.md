@@ -27,3 +27,14 @@ theme={{
 * packages/ui/src/menu-items/dashboard.js
 * packages/ui/src/views/agentflows/index.jsx
 
+
+# clear cache to run
+```
+pnpm store prune
+pnpm clean
+// 删除所有的node_modules
+pnpm install
+pnpm build-force
+pnpm start
+```
+
