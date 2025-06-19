@@ -5,7 +5,8 @@ const loadByName = (name, body) =>
         headers: {
             'Content-type': 'application/json',
             'x-request-from': 'internal'
-        }
+        },
+        withCredentials: true
     })
 
 export default {

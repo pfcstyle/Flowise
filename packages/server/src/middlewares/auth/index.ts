@@ -11,7 +11,9 @@ const authenticateArcGISToken = async (req: Request, res: Response, next: NextFu
     const token = authHeader && authHeader.split(' ')[1]
 
     if (!token || tokenType != 'Bearer') {
-        return res.sendStatus(401)
+        next()
+        // res.sendStatus(401)
+        return
     }
 
     try {
@@ -23,7 +25,9 @@ const authenticateArcGISToken = async (req: Request, res: Response, next: NextFu
         })
         if (userInfoResponse.data.error) {
             logger.error('Error validating ArcGIS token:', userInfoResponse.data.error)
-            return res.sendStatus(403)
+            next()
+            // res.sendStatus(403)
+            return
         }
         // access, orgId, role, privileges, userType, userLiscenseTypeId
         const user = userInfoResponse.data
@@ -32,7 +36,8 @@ const authenticateArcGISToken = async (req: Request, res: Response, next: NextFu
         next()
     } catch (error) {
         logger.error('Error validating ArcGIS token:', error)
-        res.sendStatus(403)
+        next()
+        // res.sendStatus(403)
     }
 }
 export default authenticateArcGISToken
