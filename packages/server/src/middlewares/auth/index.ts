@@ -31,7 +31,7 @@ const authenticateArcGISToken = async (req: Request, res: Response, next: NextFu
         }
         // access, orgId, role, privileges, userType, userLiscenseTypeId
         const user = userInfoResponse.data
-        req.user = user
+        req.arcgisUser = user
         req.token = token
         next()
     } catch (error) {

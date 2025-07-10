@@ -40,8 +40,8 @@ declare global {
     namespace Express {
         interface User extends LoggedInUser {}
         interface Request {
-            // user?: LoggedInUser,
-            user?: any
+            user?: LoggedInUser
+            arcgisUser?: any
             token?: string
         }
         namespace Multer {

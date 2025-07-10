@@ -886,7 +886,7 @@ export const utilBuildChatflow = async (req: Request, isInternal: boolean = fals
     req.body = req.body || {} // Ensure req.body is never undefined
     req.body.overrideConfig = {
         ...req.body.overrideConfig,
-        arcgisUser: req.user,
+        arcgisUser: req.arcgisUser,
         arcgisToken: req.token
     } // Ensure overrideConfig is never undefined
     const appServer = getRunningExpressApp()
