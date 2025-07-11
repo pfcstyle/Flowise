@@ -35,6 +35,6 @@ pnpm clean
 // 删除所有的node_modules
 pnpm install
 pnpm build-force
-pnpm start
+pnpm start / pnpm dev
 ```
 
