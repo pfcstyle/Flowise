@@ -12,12 +12,14 @@ export class MCPToolkit extends BaseToolkit {
     model_config: any
     transport: StdioClientTransport | SSEClientTransport | StreamableHTTPClientTransport | null = null
     client: Client | null = null
+    inputs: any | null = null
     serverParams: StdioServerParameters | any
     transportType: 'stdio' | 'sse'
-    constructor(serverParams: StdioServerParameters | any, transportType: 'stdio' | 'sse') {
+    constructor(serverParams: StdioServerParameters | any, transportType: 'stdio' | 'sse', inputs: any = null) {
         super()
         this.serverParams = serverParams
         this.transportType = transportType
+        this.inputs = inputs
     }
 
     // Method to create a new client with transport
@@ -111,7 +113,15 @@ export async function MCPTool({
         async (input): Promise<string> => {
             // Create a new client for this request
             const client = await toolkit.createClient()
-
+            let token = toolkit.inputs.arcgisToken
+            let username = toolkit.inputs.arcgisUser.username
+            if (token && username) {
+                input.params = {
+                    token: token,
+                    username: username,
+                    ...input.params
+                }
+            }
             try {
                 const req: CallToolRequest = { method: 'tools/call', params: { name: name, arguments: input } }
                 const res = await client.request(req, CallToolResultSchema)

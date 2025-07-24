@@ -4,6 +4,8 @@
 
 # docker-compose build --no-cache --force-rm
 
+# docker build -t registry.cn-hangzhou.aliyuncs.com/myelin2021/flowise-arcgis:latest .
+
 docker-compose build
 
 # docker-compose pull

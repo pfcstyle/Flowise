@@ -149,7 +149,7 @@ const Documents = () => {
                         onSearchChange={onSearchChange}
                         search={true}
                         searchPlaceholder='Search Name'
-                        title='Document Store'
+                        title='Knowledge Stores'
                         description='Store and upsert documents for LLM retrieval (RAG)'
                     >
                         <ToggleButtonGroup

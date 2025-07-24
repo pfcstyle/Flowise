@@ -35,7 +35,7 @@ const dashboard = {
     children: [
         {
             id: 'chatflows',
-            title: 'Chatflows',
+            title: 'Chat Flows',
             type: 'item',
             url: '/chatflows',
             icon: icons.IconHierarchy,
@@ -43,7 +43,7 @@ const dashboard = {
         },
         {
             id: 'agentflows',
-            title: 'Agentflows',
+            title: 'Agent Flows',
             type: 'item',
             url: '/agentflows',
             icon: icons.IconUsersGroup,
@@ -51,23 +51,23 @@ const dashboard = {
         },
         {
             id: 'executions',
-            title: 'Executions',
+            title: 'Observations',
             type: 'item',
             url: '/executions',
             icon: icons.IconListCheck,
             breadcrumbs: true
         },
-        {
-            id: 'assistants',
-            title: 'Assistants',
-            type: 'item',
-            url: '/assistants',
-            icon: icons.IconRobot,
-            breadcrumbs: true
-        },
+        // {
+        //     id: 'assistants',
+        //     title: 'Assistants',
+        //     type: 'item',
+        //     url: '/assistants',
+        //     icon: icons.IconRobot,
+        //     breadcrumbs: true
+        // },
         {
             id: 'marketplaces',
-            title: 'Marketplaces',
+            title: 'Templates',
             type: 'item',
             url: '/marketplaces',
             icon: icons.IconBuildingStore,
@@ -81,33 +81,33 @@ const dashboard = {
             icon: icons.IconTool,
             breadcrumbs: true
         },
-        {
-            id: 'credentials',
-            title: 'Credentials',
-            type: 'item',
-            url: '/credentials',
-            icon: icons.IconLock,
-            breadcrumbs: true
-        },
-        {
-            id: 'variables',
-            title: 'Variables',
-            type: 'item',
-            url: '/variables',
-            icon: icons.IconVariable,
-            breadcrumbs: true
-        },
-        {
-            id: 'apikey',
-            title: 'API Keys',
-            type: 'item',
-            url: '/apikey',
-            icon: icons.IconKey,
-            breadcrumbs: true
-        },
+        // {
+        //     id: 'credentials',
+        //     title: 'Credentials',
+        //     type: 'item',
+        //     url: '/credentials',
+        //     icon: icons.IconLock,
+        //     breadcrumbs: true
+        // },
+        // {
+        //     id: 'variables',
+        //     title: 'Variables',
+        //     type: 'item',
+        //     url: '/variables',
+        //     icon: icons.IconVariable,
+        //     breadcrumbs: true
+        // },
+        // {
+        //     id: 'apikey',
+        //     title: 'API Keys',
+        //     type: 'item',
+        //     url: '/apikey',
+        //     icon: icons.IconKey,
+        //     breadcrumbs: true
+        // },
         {
             id: 'document-stores',
-            title: 'Document Stores',
+            title: 'Knowledge Stores',
             type: 'item',
             url: '/document-stores',
             icon: icons.IconFiles,

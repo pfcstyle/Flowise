@@ -1464,6 +1464,9 @@ export const executeAgentFlow = async ({
         const reactFlowNode = nodes.find((nd) => nd.id === currentNode.nodeId)
         if (!reactFlowNode || reactFlowNode === undefined || reactFlowNode.data.name === 'stickyNoteAgentflow') continue
 
+        reactFlowNode.data.inputs = reactFlowNode.data.inputs ?? {}
+        reactFlowNode.data.inputs['arcgisUser'] = incomingInput.overrideConfig?.arcgisUser
+        reactFlowNode.data.inputs['arcgisToken'] = incomingInput.overrideConfig?.arcgisToken
         let nodeResult
         try {
             // Check for abort signal early in the loop

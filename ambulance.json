@@ -1,0 +1,27 @@
+[
+  {
+    "id": "Ambulance-01",
+    "base_location": "-122.4194,37.7749",
+    "status": "Dispatched"
+  },
+  {
+    "id": "Ambulance-02",
+    "base_location": "-122.4347,37.7997",
+    "status": "Available"
+  },
+  {
+    "id": "Ambulance-03",
+    "base_location": "-122.4064,37.7858",
+    "status": "Dispatched"
+  },
+  {
+    "id": "Ambulance-04",
+    "base_location": "-122.4633,37.7694",
+    "status": "Available"
+  },
+  {
+    "id": "Ambulance-05",
+    "base_location": "-122.4862,37.7699",
+    "status": "Available"
+  }
+]

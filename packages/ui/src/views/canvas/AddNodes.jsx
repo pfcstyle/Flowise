@@ -165,7 +165,8 @@ const AddNodes = ({ nodesData, node, isAgentCanvas, isAgentflowv2, onFlowGenerat
         if (newTabValue === 0) {
             return langchainNodes
         } else if (newTabValue === 1) {
-            return llmaindexNodes
+            return utilitiesNodes
+            // return llmaindexNodes
         } else {
             return utilitiesNodes
         }
@@ -265,7 +266,8 @@ const AddNodes = ({ nodesData, node, isAgentCanvas, isAgentflowv2, onFlowGenerat
         if (tabValue === 0) {
             return LangChainPNG
         } else if (tabValue === 1) {
-            return LlamaindexPNG
+            // return LlamaindexPNG
+            return utilNodesPNG
         } else {
             return utilNodesPNG
         }
@@ -434,7 +436,7 @@ const AddNodes = ({ nodesData, node, isAgentCanvas, isAgentflowv2, onFlowGenerat
                                                 onChange={handleTabChange}
                                                 aria-label='tabs'
                                             >
-                                                {['LangChain', 'LlamaIndex', 'Utilities'].map((item, index) => (
+                                                {['Nodes', 'Utilities'].map((item, index) => (
                                                     <Tab
                                                         icon={
                                                             <div

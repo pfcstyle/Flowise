@@ -135,7 +135,7 @@ const Chatflows = () => {
                         onSearchChange={onSearchChange}
                         search={true}
                         searchPlaceholder='Search Name or Category'
-                        title='Chatflows'
+                        title='Chat Flows'
                         description='Build single-agent systems, chatbots and simple LLM flows'
                     >
                         <ToggleButtonGroup

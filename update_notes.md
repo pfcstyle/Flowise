@@ -38,3 +38,7 @@ pnpm build-force
 pnpm start / pnpm dev
 ```
 
+# aggregate error
+
+Start pgVector service
+

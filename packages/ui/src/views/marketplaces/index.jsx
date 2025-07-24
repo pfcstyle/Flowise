@@ -52,7 +52,7 @@ import useNotifier from '@/utils/useNotifier'
 
 const badges = ['POPULAR', 'NEW']
 const types = ['Chatflow', 'Agentflow', 'AgentflowV2', 'Tool']
-const framework = ['Langchain', 'LlamaIndex']
+const framework = ['Langchain']
 const MenuProps = {
     PaperProps: {
         style: {
@@ -548,7 +548,7 @@ const Marketplace = () => {
                             onSearchChange={onSearchChange}
                             search={true}
                             searchPlaceholder='Search Name/Description/Node'
-                            title='Marketplace'
+                            title='Templates'
                             description='Explore and use pre-built templates'
                         >
                             <ToggleButtonGroup
