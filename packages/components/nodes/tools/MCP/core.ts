@@ -115,15 +115,15 @@ export async function MCPTool({
             const client = await toolkit.createClient()
             let token = toolkit.inputs.arcgisToken
             let username = toolkit.inputs.arcgisUser.username
+            let _meta = {}
             if (token && username) {
-                input.params = {
+                _meta = {
                     token: token,
-                    username: username,
-                    ...input.params
+                    username: username
                 }
             }
             try {
-                const req: CallToolRequest = { method: 'tools/call', params: { name: name, arguments: input } }
+                const req: CallToolRequest = { method: 'tools/call', params: { name: name, arguments: input, _meta: _meta } }
                 const res = await client.request(req, CallToolResultSchema)
                 const content = res.content
                 const contentString = JSON.stringify(content)

@@ -2,7 +2,7 @@ import { Tool } from '@langchain/core/tools'
 import { INode, INodeData, INodeOptionsValue, INodeParams } from '../../../../src/Interface'
 import { MCPToolkit } from '../core'
 
-class ArcGISLocationService_MCP implements INode {
+class ArcGISFeatureService_MCP implements INode {
     label: string
     name: string
     version: number
@@ -16,13 +16,13 @@ class ArcGISLocationService_MCP implements INode {
     inputs: INodeParams[]
 
     constructor() {
-        this.label = 'ArcGIS Location Service MCP'
-        this.name = 'arcgisLocationServiceMCP'
+        this.label = 'ArcGIS Feature Service MCP'
+        this.name = 'arcgisFeatureServiceMCP'
         this.version = 1.0
-        this.type = 'ArcGIS Location Service MCP Tool'
-        this.icon = 'arcGISLocationServiceMCP.svg'
+        this.type = 'ArcGIS Feature Service MCP Tool'
+        this.icon = 'arcGISFeatureServiceMCP.svg'
         this.category = 'Tools (MCP)'
-        this.description = 'MCP Server for ArcGIS Location Services'
+        this.description = 'MCP Server for ArcGIS Feature Services'
         this.documentation = 'https://github.com/modelcontextprotocol/servers'
         this.inputs = [
             {
@@ -78,7 +78,7 @@ class ArcGISLocationService_MCP implements INode {
     async getTools(nodeData: INodeData): Promise<Tool[]> {
         let serverParams = {
             // url: 'https://server.smithery.ai/@puran1218/arcgis-location-services-mcp/mcp?api_key=1b58cf58-76e7-49d8-bdf1-f916b6ef6b57&profile=clumsy-lizard-56AwZy'
-            url: 'http://127.0.0.1:9001/mcp'
+            url: 'http://127.0.0.1:9002/mcp'
         }
         const toolkit = new MCPToolkit(serverParams, 'sse', nodeData.inputs)
         await toolkit.initialize()
@@ -87,4 +87,4 @@ class ArcGISLocationService_MCP implements INode {
     }
 }
 
-module.exports = { nodeClass: ArcGISLocationService_MCP }
+module.exports = { nodeClass: ArcGISFeatureService_MCP }
