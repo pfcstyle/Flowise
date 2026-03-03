@@ -8,6 +8,7 @@ import { cloneDeep, omit, get } from 'lodash'
 import TurndownService from 'turndown'
 import { DataSource, Equal } from 'typeorm'
 import { ICommonObject, IDatabaseEntity, IFileUpload, IMessage, INodeData, IVariable, MessageContentImageUrl } from './Interface'
+import { BaseChatModel } from '@langchain/core/language_models/chat_models'
 import { AES, enc } from 'crypto-js'
 import { AIMessage, HumanMessage, BaseMessage } from '@langchain/core/messages'
 import { Document } from '@langchain/core/documents'
@@ -121,21 +122,7 @@ export const availableDependencies = [
 
 const defaultAllowExternalDependencies = ['axios', 'moment', 'node-fetch']
 
-export const defaultAllowBuiltInDep = [
-    'assert',
-    'buffer',
-    'crypto',
-    'events',
-    'http',
-    'https',
-    'net',
-    'path',
-    'querystring',
-    'timers',
-    'tls',
-    'url',
-    'zlib'
-]
+export const defaultAllowBuiltInDep = ['assert', 'buffer', 'crypto', 'events', 'path', 'querystring', 'timers', 'url', 'zlib']
 
 /**
  * Get base classes of components
@@ -1129,6 +1116,18 @@ export const mapMimeTypeToExt = (mimeType: string) => {
         case 'application/jsonl':
         case 'text/jsonl':
             return 'jsonl'
+        // YAML types
+        case 'application/vnd.yaml':
+        case 'application/x-yaml':
+        case 'text/vnd.yaml':
+        case 'text/x-yaml':
+        case 'text/yaml':
+            return 'yaml'
+        // SQL types
+        case 'application/sql':
+        case 'text/x-sql':
+            return 'sql'
+        // Document types
         case 'application/msword':
             return 'doc'
         case 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
@@ -1141,14 +1140,130 @@ export const mapMimeTypeToExt = (mimeType: string) => {
             return 'ppt'
         case 'application/vnd.openxmlformats-officedocument.presentationml.presentation':
             return 'pptx'
+        case 'application/rtf':
+            return 'rtf'
+        // Image types
+        case 'image/jpeg':
+        case 'image/jpg':
+            return 'jpg'
+        case 'image/png':
+            return 'png'
+        case 'image/gif':
+            return 'gif'
+        case 'image/webp':
+            return 'webp'
+        case 'image/svg+xml':
+            return 'svg'
+        case 'image/bmp':
+            return 'bmp'
+        case 'image/tiff':
+        case 'image/tif':
+            return 'tiff'
+        case 'image/x-icon':
+        case 'image/vnd.microsoft.icon':
+            return 'ico'
+        case 'image/avif':
+            return 'avif'
+        // Audio types
+        case 'audio/webm':
+            return 'webm'
+        case 'audio/mp4':
+        case 'audio/x-m4a':
+            return 'm4a'
+        case 'audio/mpeg':
+        case 'audio/mp3':
+            return 'mp3'
+        case 'audio/ogg':
+        case 'audio/oga':
+            return 'ogg'
+        case 'audio/wav':
+        case 'audio/wave':
+        case 'audio/x-wav':
+            return 'wav'
+        case 'audio/aac':
+            return 'aac'
+        case 'audio/flac':
+            return 'flac'
+        // Video types
+        case 'video/mp4':
+            return 'mp4'
+        case 'video/webm':
+            return 'webm'
+        case 'video/quicktime':
+            return 'mov'
+        case 'video/x-msvideo':
+            return 'avi'
         default:
             return ''
     }
 }
 
+/**
+ * MIME types allowed for full file upload (chatflow config).
+ * Server validates stored allowedUploadFileTypes against this list to prevent
+ * malicious clients from allowing executables or other dangerous types.
+ * Uses a Set for O(1) lookups and to make the unique allowed set explicit.
+ */
+export const ALLOWED_UPLOAD_MIME_TYPES: ReadonlySet<string> = new Set([
+    'text/css',
+    'text/csv',
+    'text/html',
+    'application/json',
+    'text/markdown',
+    'application/x-yaml',
+    'application/pdf',
+    'application/sql',
+    'text/plain',
+    'application/xml',
+    'application/msword',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    'application/vnd.openxmlformats-officedocument.presentationml.presentation'
+])
+
+/**
+ * Returns true if the MIME type is allowed for file upload config.
+ * Must be in ALLOWED_UPLOAD_MIME_TYPES and have a mapping in mapMimeTypeToExt.
+ * @param {string} mime
+ * @returns {boolean}
+ */
+export const isAllowedUploadMimeType = (mime: string): boolean => {
+    if (!mime || typeof mime !== 'string') return false
+    const trimmed = mime.trim()
+    if (!trimmed) return false
+    return ALLOWED_UPLOAD_MIME_TYPES.has(trimmed) && mapMimeTypeToExt(trimmed) !== ''
+}
+
 // remove invalid markdown image pattern: ![<some-string>](<some-string>)
+// Uses indexOf instead of a global regex to avoid O(n²) backtracking when the
+// input contains many '![' sequences (polynomial ReDoS with the g flag).
 export const removeInvalidImageMarkdown = (output: string): string => {
-    return typeof output === 'string' ? output.replace(/!\[.*?\]\((?!https?:\/\/).*?\)/g, '') : output
+    if (typeof output !== 'string') return output
+    let result = ''
+    let pos = 0
+    while (pos < output.length) {
+        const start = output.indexOf('![', pos)
+        if (start === -1) {
+            result += output.slice(pos)
+            break
+        }
+        result += output.slice(pos, start)
+        const closeBracket = output.indexOf(']', start + 2)
+        if (closeBracket === -1 || output[closeBracket + 1] !== '(') {
+            result += '!['
+            pos = start + 2
+            continue
+        }
+        const closeParen = output.indexOf(')', closeBracket + 2)
+        if (closeParen === -1) {
+            result += output.slice(start)
+            break
+        }
+        const url = output.slice(closeBracket + 2, closeParen)
+        if (/^https?:\/\//.test(url)) result += output.slice(start, closeParen + 1)
+        pos = closeParen + 1
+    }
+    return result
 }
 
 /**
@@ -1354,8 +1469,12 @@ export const stripHTMLFromToolInput = (input: string) => {
     return cleanedInput
 }
 
+// Regex constants exported for testability
+export const COMMONJS_REQUIRE_REGEX = /^(const|let|var)\s+\S[^=]*=\s*require\s*\(/
+export const IMPORT_EXTRACTION_REGEX = /(?:import\s+\S[^\n]*?\s+from\s+['"]([^'"]+)['"]|require\s*\(\s*['"]([^'"]+)['"]\s*\))/
+
 // Helper function to convert require statements to ESM imports
-const convertRequireToImport = (requireLine: string): string | null => {
+export const convertRequireToImport = (requireLine: string): string | null => {
     // Remove leading/trailing whitespace and get the indentation
     const indent = requireLine.match(/^(\s*)/)?.[1] || ''
     const trimmed = requireLine.trim()
@@ -1368,7 +1487,7 @@ const convertRequireToImport = (requireLine: string): string | null => {
     }
 
     // Match patterns like: const { name1, name2 } = require('module')
-    const destructureMatch = trimmed.match(/^(const|let|var)\s+\{\s*([^}]+)\s*\}\s*=\s*require\s*\(\s*['"`]([^'"`]+)['"`]\s*\)/)
+    const destructureMatch = trimmed.match(/^(const|let|var)\s+\{([^}]+)\}\s*=\s*require\s*\(\s*['"`]([^'"`]+)['"`]\s*\)/)
     if (destructureMatch) {
         const [, , destructuredVars, moduleName] = destructureMatch
         return `${indent}import { ${destructuredVars.trim()} } from '${moduleName}';`
@@ -1488,7 +1607,7 @@ export const executeJavaScriptCode = async (
                     importLines.push(line)
                 }
                 // Check for CommonJS require statements and convert them to ESM imports
-                else if (/^(const|let|var)\s+.*=\s*require\s*\(/.test(trimmedLine)) {
+                else if (COMMONJS_REQUIRE_REGEX.test(trimmedLine)) {
                     const convertedImport = convertRequireToImport(trimmedLine)
                     if (convertedImport) {
                         importLines.push(convertedImport)
@@ -1505,7 +1624,7 @@ export const executeJavaScriptCode = async (
 
             // Auto-detect required libraries from code
             // Extract required modules from import/require statements
-            const importRegex = /(?:import\s+.*?\s+from\s+['"]([^'"]+)['"]|require\s*\(\s*['"]([^'"]+)['"]\s*\))/g
+            const importRegex = new RegExp(IMPORT_EXTRACTION_REGEX.source, 'g')
             let match
             while ((match = importRegex.exec(code)) !== null) {
                 const moduleName = match[1] || match[2]
@@ -1940,4 +2059,161 @@ export async function parseWithTypeConversion<T extends z.ZodTypeAny>(schema: T,
         // Re-throw the original error if not a ZodError or no conversion possible
         throw e
     }
+}
+
+/**
+ * Configures structured output for the LLM using Zod schema
+ * @param {BaseChatModel} llmNodeInstance - The LLM instance to configure
+ * @param {any[]} structuredOutput - Array of structured output schema definitions
+ * @returns {BaseChatModel} - The configured LLM instance
+ */
+export const configureStructuredOutput = (llmNodeInstance: BaseChatModel, structuredOutput: any[]): BaseChatModel => {
+    try {
+        const zodObj: ICommonObject = {}
+        for (const sch of structuredOutput) {
+            if (sch.type === 'string') {
+                zodObj[sch.key] = z.string().describe(sch.description || '')
+            } else if (sch.type === 'stringArray') {
+                zodObj[sch.key] = z.array(z.string()).describe(sch.description || '')
+            } else if (sch.type === 'number') {
+                zodObj[sch.key] = z.number().describe(sch.description || '')
+            } else if (sch.type === 'boolean') {
+                zodObj[sch.key] = z.boolean().describe(sch.description || '')
+            } else if (sch.type === 'enum') {
+                const enumValues = sch.enumValues?.split(',').map((item: string) => item.trim()) || []
+                zodObj[sch.key] = z
+                    .enum(enumValues.length ? (enumValues as [string, ...string[]]) : ['default'])
+                    .describe(sch.description || '')
+            } else if (sch.type === 'jsonArray') {
+                const jsonSchema = sch.jsonSchema
+                if (jsonSchema) {
+                    try {
+                        // Parse the JSON schema
+                        const schemaObj = JSON.parse(jsonSchema)
+
+                        // Create a Zod schema from the JSON schema
+                        const itemSchema = createZodSchemaFromJSON(schemaObj)
+
+                        // Create an array schema of the item schema
+                        zodObj[sch.key] = z.array(itemSchema).describe(sch.description || '')
+                    } catch (err) {
+                        console.error(`Error parsing JSON schema for ${sch.key}:`, err)
+                        // Fallback to generic array of records
+                        zodObj[sch.key] = z.array(z.record(z.any())).describe(sch.description || '')
+                    }
+                } else {
+                    // If no schema provided, use generic array of records
+                    zodObj[sch.key] = z.array(z.record(z.any())).describe(sch.description || '')
+                }
+            }
+        }
+        const structuredOutputSchema = z.object(zodObj)
+
+        // @ts-ignore
+        return llmNodeInstance.withStructuredOutput(structuredOutputSchema)
+    } catch (exception) {
+        console.error(exception)
+        return llmNodeInstance
+    }
+}
+
+/**
+ * Creates a Zod schema from a JSON schema object
+ * @param {any} jsonSchema - The JSON schema object
+ * @returns {z.ZodTypeAny} - A Zod schema
+ */
+export const createZodSchemaFromJSON = (jsonSchema: any): z.ZodTypeAny => {
+    // If the schema is an object with properties, create an object schema
+    if (typeof jsonSchema === 'object' && jsonSchema !== null) {
+        const schemaObj: Record<string, z.ZodTypeAny> = {}
+
+        // Process each property in the schema
+        for (const [key, value] of Object.entries(jsonSchema)) {
+            if (value === null) {
+                // Handle null values
+                schemaObj[key] = z.null()
+            } else if (typeof value === 'object' && !Array.isArray(value)) {
+                // Check if the property has a type definition
+                if ('type' in value) {
+                    const type = value.type as string
+                    const description = ('description' in value ? (value.description as string) : '') || ''
+
+                    // Create the appropriate Zod type based on the type property
+                    if (type === 'string') {
+                        schemaObj[key] = z.string().describe(description)
+                    } else if (type === 'number') {
+                        schemaObj[key] = z.number().describe(description)
+                    } else if (type === 'boolean') {
+                        schemaObj[key] = z.boolean().describe(description)
+                    } else if (type === 'array') {
+                        // If it's an array type, check if items is defined
+                        if ('items' in value && value.items) {
+                            const itemSchema = createZodSchemaFromJSON(value.items)
+                            schemaObj[key] = z.array(itemSchema).describe(description)
+                        } else {
+                            // Default to array of any if items not specified
+                            schemaObj[key] = z.array(z.any()).describe(description)
+                        }
+                    } else if (type === 'object') {
+                        // If it's an object type, check if properties is defined
+                        if ('properties' in value && value.properties) {
+                            const nestedSchema = createZodSchemaFromJSON(value.properties)
+                            schemaObj[key] = nestedSchema.describe(description)
+                        } else {
+                            // Default to record of any if properties not specified
+                            schemaObj[key] = z.record(z.any()).describe(description)
+                        }
+                    } else {
+                        // Default to any for unknown types
+                        schemaObj[key] = z.any().describe(description)
+                    }
+
+                    // Check if the property is optional
+                    if ('optional' in value && value.optional === true) {
+                        schemaObj[key] = schemaObj[key].optional()
+                    }
+                } else if (Array.isArray(value)) {
+                    // Array values without a type property
+                    if (value.length > 0) {
+                        // If the array has items, recursively create a schema for the first item
+                        const itemSchema = createZodSchemaFromJSON(value[0])
+                        schemaObj[key] = z.array(itemSchema)
+                    } else {
+                        // Empty array, allow any array
+                        schemaObj[key] = z.array(z.any())
+                    }
+                } else {
+                    // It's a nested object without a type property, recursively create schema
+                    schemaObj[key] = createZodSchemaFromJSON(value)
+                }
+            } else if (Array.isArray(value)) {
+                // Array values
+                if (value.length > 0) {
+                    // If the array has items, recursively create a schema for the first item
+                    const itemSchema = createZodSchemaFromJSON(value[0])
+                    schemaObj[key] = z.array(itemSchema)
+                } else {
+                    // Empty array, allow any array
+                    schemaObj[key] = z.array(z.any())
+                }
+            } else {
+                // For primitive values (which shouldn't be in the schema directly)
+                // Use the corresponding Zod type
+                if (typeof value === 'string') {
+                    schemaObj[key] = z.string()
+                } else if (typeof value === 'number') {
+                    schemaObj[key] = z.number()
+                } else if (typeof value === 'boolean') {
+                    schemaObj[key] = z.boolean()
+                } else {
+                    schemaObj[key] = z.any()
+                }
+            }
+        }
+
+        return z.object(schemaObj)
+    }
+
+    // Fallback to any for unknown types
+    return z.any()
 }

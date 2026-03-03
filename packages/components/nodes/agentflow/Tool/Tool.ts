@@ -29,7 +29,7 @@ class Tool_Agentflow implements INode {
     constructor() {
         this.label = 'Tool'
         this.name = 'toolAgentflow'
-        this.version = 1.1
+        this.version = 1.2
         this.type = 'Tool'
         this.category = 'Agent Flows'
         this.description = 'Tools allow LLM to interact with external systems'
@@ -80,8 +80,7 @@ class Tool_Agentflow implements INode {
                         label: 'Key',
                         name: 'key',
                         type: 'asyncOptions',
-                        loadMethod: 'listRuntimeStateKeys',
-                        freeSolo: true
+                        loadMethod: 'listRuntimeStateKeys'
                     },
                     {
                         label: 'Value',
@@ -237,11 +236,11 @@ class Tool_Agentflow implements INode {
             // ex: \["a", "b", "c", "d", "e"\]
             let cleanedValue = value
                 .replace(/\\"/g, '"') // \" -> "
-                .replace(/\\\\/g, '\\') // \\ -> \
                 .replace(/\\\[/g, '[') // \[ -> [
                 .replace(/\\\]/g, ']') // \] -> ]
                 .replace(/\\\{/g, '{') // \{ -> {
                 .replace(/\\\}/g, '}') // \} -> }
+                .replace(/\\\\/g, '\\') // \\ -> \ (unescape backslash last)
 
             // Try to parse as JSON if it looks like JSON/array
             if (

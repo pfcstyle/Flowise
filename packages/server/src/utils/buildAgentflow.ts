@@ -361,7 +361,7 @@ export const resolveVariables = async (
                 // Extract nodeId and outputPath from the match
                 const [, nodeIdPart, outputPath] = outputMatch
                 // Clean nodeId (handle escaped underscores)
-                const cleanNodeId = nodeIdPart.replace('\\', '')
+                const cleanNodeId = nodeIdPart.replace(/\\/g, '')
 
                 // Find the last (most recent) matching node data instead of the first one
                 const nodeData = [...agentFlowExecutedData].reverse().find((d) => d.nodeId === cleanNodeId)
@@ -389,7 +389,7 @@ export const resolveVariables = async (
 
             // Find node data in executed data
             // sometimes turndown value returns a backslash like `llmAgentflow\_1`, remove the backslash
-            const cleanNodeId = variableFullPath.replace('\\', '')
+            const cleanNodeId = variableFullPath.replace(/\\/g, '')
             // Find the last (most recent) matching node data instead of the first one
             const nodeData = agentFlowExecutedData
                 ? [...agentFlowExecutedData].reverse().find((data) => data.nodeId === cleanNodeId)
@@ -769,12 +769,20 @@ async function determineNodesToIgnore(
     if (isDecisionNode && result.output?.conditions) {
         const outputConditions: ICondition[] = result.output.conditions
 
+        // safety net: if no conditions were fulfilled, don't ignore ALL children
+        // treat the last condition as an else/default fallback
+        const anyFulfilled = outputConditions.some((c) => c.isFulfilled === true)
+        if (!anyFulfilled && outputConditions.length > 0) {
+            // mark the last condition as fulfilled so at least one branch executes
+            outputConditions[outputConditions.length - 1].isFulfilled = true
+        }
+
         // Find indexes of unfulfilled conditions
         const unfulfilledIndexes = outputConditions
-            .map((condition: any, index: number) =>
+            .map((condition, index) =>
                 condition.isFulfilled === false || !Object.prototype.hasOwnProperty.call(condition, 'isFulfilled') ? index : -1
             )
-            .filter((index: number) => index !== -1)
+            .filter((index) => index !== -1)
 
         // Find nodes to ignore based on unfulfilled conditions
         for (const index of unfulfilledIndexes) {
@@ -1102,10 +1110,16 @@ const executeNode = async ({
         }
 
         // Resolve variables in node data
+        let formValue: Record<string, any> = {}
+        if (isObjectNotEmpty(incomingInput.form)) {
+            formValue = incomingInput.form as Record<string, any>
+        } else if (isObjectNotEmpty(agentflowRuntime.form)) {
+            formValue = agentflowRuntime.form as Record<string, any>
+        }
         const reactFlowNodeData: INodeData = await resolveVariables(
             flowNodeData,
             incomingInput.question ?? '',
-            incomingInput.form ?? agentflowRuntime.form ?? {},
+            formValue,
             flowConfig,
             availableVariables,
             variableOverrides,
@@ -1890,8 +1904,9 @@ export const executeAgentFlow = async ({
                 chatId
             })
             await analyticHandlers.init()
+            const flowName = chatflow.name || 'Agentflow'
             parentTraceIds = await analyticHandlers.onChainStart(
-                'Agentflow',
+                flowName,
                 form && Object.keys(form).length > 0 ? JSON.stringify(form) : question || ''
             )
         }
@@ -2122,7 +2137,62 @@ export const executeAgentFlow = async ({
 
     // check if last agentFlowExecutedData.data.output contains the key "content"
     const lastNodeOutput = agentFlowExecutedData[agentFlowExecutedData.length - 1].data?.output as ICommonObject | undefined
-    const content = (lastNodeOutput?.content as string) ?? ' '
+    let content = (lastNodeOutput?.content as string) ?? ' '
+
+    /* Check for post-processing settings */
+    let chatflowConfig: ICommonObject = {}
+    try {
+        if (chatflow.chatbotConfig) {
+            chatflowConfig = typeof chatflow.chatbotConfig === 'string' ? JSON.parse(chatflow.chatbotConfig) : chatflow.chatbotConfig
+        }
+    } catch (e) {
+        logger.error('[server]: Error parsing chatflow config:', e)
+    }
+
+    if (chatflowConfig?.postProcessing?.enabled === true && content) {
+        try {
+            const postProcessingFunction = JSON.parse(chatflowConfig?.postProcessing?.customFunction)
+            const nodeInstanceFilePath = componentNodes['customFunctionAgentflow'].filePath as string
+            const nodeModule = await import(nodeInstanceFilePath)
+            //set the outputs.output to EndingNode to prevent json escaping of content...
+            const nodeData = {
+                inputs: { customFunctionJavascriptFunction: postProcessingFunction }
+            }
+            const runtimeChatHistory = agentflowRuntime.chatHistory || []
+            const chatHistory = [...pastChatHistory, ...runtimeChatHistory]
+            const options: ICommonObject = {
+                chatflowid: chatflow.id,
+                sessionId,
+                chatId,
+                input: question || form,
+                postProcessing: {
+                    rawOutput: content,
+                    chatHistory: cloneDeep(chatHistory),
+                    sourceDocuments: lastNodeOutput?.sourceDocuments ? cloneDeep(lastNodeOutput.sourceDocuments) : undefined,
+                    usedTools: lastNodeOutput?.usedTools ? cloneDeep(lastNodeOutput.usedTools) : undefined,
+                    artifacts: lastNodeOutput?.artifacts ? cloneDeep(lastNodeOutput.artifacts) : undefined,
+                    fileAnnotations: lastNodeOutput?.fileAnnotations ? cloneDeep(lastNodeOutput.fileAnnotations) : undefined
+                },
+                appDataSource,
+                databaseEntities,
+                workspaceId,
+                orgId,
+                logger
+            }
+            const customFuncNodeInstance = new nodeModule.nodeClass()
+            const customFunctionResponse = await customFuncNodeInstance.run(nodeData, question || form, options)
+            const moderatedResponse = customFunctionResponse.output.content
+            if (typeof moderatedResponse === 'string') {
+                content = moderatedResponse
+            } else if (typeof moderatedResponse === 'object') {
+                content = '```json\n' + JSON.stringify(moderatedResponse, null, 2) + '\n```'
+            } else {
+                content = moderatedResponse
+            }
+        } catch (e) {
+            logger.error('[server]: Post Processing Error:', e)
+        }
+    }
 
     // remove credentialId from agentFlowExecutedData
     agentFlowExecutedData = agentFlowExecutedData.map((data) => _removeCredentialId(data))
@@ -2279,4 +2349,11 @@ export const executeAgentFlow = async ({
     }
 
     return result
+}
+
+/**
+ * Utility function to check if an object is not empty, null, or undefined
+ */
+export const isObjectNotEmpty = (obj: any): boolean => {
+    return obj && Object.keys(obj).length > 0 && obj.constructor === Object
 }
